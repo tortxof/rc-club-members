@@ -113,25 +113,25 @@ class MembersDatabase(object):
 
     def remove(self, rowid):
         conn = sqlite3.connect(self.dbfile)
-        conn.execute('delete from mealplans where rowid=?', (rowid,))
+        conn.execute('delete from members where rowid=?', (rowid,))
         conn.commit()
         conn.close()
 
     def get(self, rowid):
         conn = sqlite3.connect(self.dbfile)
-        record = conn.execute('select *,rowid from mealplans where rowid=?', (rowid,)).fetchone()
+        record = conn.execute('select *,rowid from members where rowid=?', (rowid,)).fetchone()
         conn.close()
         return record
 
     def all(self):
         conn = sqlite3.connect(self.dbfile)
-        records = conn.execute('select *,rowid from mealplans').fetchall()
+        records = conn.execute('select *,rowid from members').fetchall()
         conn.close()
         return [dict(zip(self.fields, record)) for record in records]
 
     def search(self, query):
         conn = sqlite3.connect(self.dbfile)
-        records = conn.execute('select *,rowid from mealplans where mealplans match ?', (query,)).fetchall()
+        records = conn.execute('select *,rowid from members where members match ?', (query,)).fetchall()
         conn.close()
         return [dict(zip(self.fields, record)) for record in records]
 
