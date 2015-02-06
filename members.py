@@ -105,9 +105,9 @@ class MembersDatabase(object):
         conn.close()
         return bcrypt.checkpw(password, stored_password)
 
-    def add(self, filename, content):
+    def add(self, record):
         conn = sqlite3.connect(self.dbfile)
-        conn.execute('insert into members values(?, ?)', (filename, content))
+        conn.execute('insert into members values(' + ', '.join('?' * (len(self.fields) - 1)) + ')', record)
         conn.commit()
         conn.close()
 
