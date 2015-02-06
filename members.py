@@ -82,12 +82,12 @@ auth_keys = AuthKeys()
 
 class MembersDatabase(object):
     def __init__(self):
-        self.dbfile = 'mps.db'
-        self.fields = ('filename', 'content', 'rowid')
+        self.dbfile = 'members.db'
+        self.fields = ('first', 'last', 'ama', 'phone', 'address', 'city', 'state', 'zip', 'email', 'expire', 'rowid')
 
     def new_db(self):
         conn = sqlite3.connect(self.dbfile)
-        conn.execute('create virtual table mealplans using fts4(filename, content)')
+        conn.execute('create virtual table members using fts4(' + ', '.join(self.fields[:-1]) + ')')
         conn.execute('create table appusers (appuser text primary key not null, password text)')
         conn.commit()
         conn.close()
@@ -107,7 +107,7 @@ class MembersDatabase(object):
 
     def add(self, filename, content):
         conn = sqlite3.connect(self.dbfile)
-        conn.execute('insert into mealplans values(?, ?)', (filename, content))
+        conn.execute('insert into members values(?, ?)', (filename, content))
         conn.commit()
         conn.close()
 
@@ -134,17 +134,6 @@ class MembersDatabase(object):
         records = conn.execute('select *,rowid from mealplans where mealplans match ?', (query,)).fetchall()
         conn.close()
         return [dict(zip(self.fields, record)) for record in records]
-
-    def batch_import(self):
-        import_dir = 'import'
-        content = ''
-        files = os.listdir(path=import_dir)
-        for filename in files:
-            with open(import_dir + '/' + filename, mode='r+b') as f:
-                content = pdftotext(f.read())
-                content = ' '.join(content.split())
-            self.add(filename, content)
-        return True
 
 members_db = MembersDatabase()
 
