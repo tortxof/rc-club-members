@@ -238,9 +238,38 @@ class Root(object):
 
     @cherrypy.expose
     def all(self):
-        out = html['search']
-        for record in members_db.all():
-            out += html['record'].format(**record)
+        out = ''
+        if loggedIn():
+            out += html['search']
+            for record in members_db.all():
+                out += html['record'].format(**record)
+        else:
+            out += html['message'].format(content='You are not logged in.')
+            out += html['login']
+        return html['template'].format(content=out)
+
+    @cherrypy.expose
+    def expired(self):
+        out = ''
+        if loggedIn():
+            out += html['search']
+            for record in members_db.expired():
+                out += html['record'].format(**record)
+        else:
+            out += html['message'].format(content='You are not logged in.')
+            out += html['login']
+        return html['template'].format(content=out)
+
+    @cherrypy.expose
+    def current(self):
+        out = ''
+        if loggedIn():
+            out += html['search']
+            for record in members_db.current():
+                out += html['record'].format(**record)
+        else:
+            out += html['message'].format(content='You are not logged in.')
+            out += html['login']
         return html['template'].format(content=out)
 
     @cherrypy.expose
