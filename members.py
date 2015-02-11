@@ -240,36 +240,24 @@ class Root(object):
         return html['template'].format(content=out)
 
     @cherrypy.expose
-    def all(self):
+    def all(self, *args):
         out = ''
         if loggedIn():
             out += html['search']
-            for record in members_db.all():
-                out += html['record'].format(**record)
-        else:
-            out += html['message'].format(content='You are not logged in.')
-            out += html['login']
-        return html['template'].format(content=out)
-
-    @cherrypy.expose
-    def expired(self):
-        out = ''
-        if loggedIn():
-            out += html['search']
-            for record in members_db.expired():
-                out += html['record'].format(**record)
-        else:
-            out += html['message'].format(content='You are not logged in.')
-            out += html['login']
-        return html['template'].format(content=out)
-
-    @cherrypy.expose
-    def current(self):
-        out = ''
-        if loggedIn():
-            out += html['search']
-            for record in members_db.current():
-                out += html['record'].format(**record)
+            if 'expired' in args:
+                records = members_db.expired()
+            elif 'current' in args:
+                records = members_db.current()
+            else:
+                records = members_db.all()
+            if 'email' in args:
+                emails = ''
+                for record in records:
+                    emails += record['email'] + '\n'
+                out += html['text'].format(content=emails)
+            else:
+                for record in records:
+                    out += html['record'].format(**record)
         else:
             out += html['message'].format(content='You are not logged in.')
             out += html['login']
