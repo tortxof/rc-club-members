@@ -235,7 +235,9 @@ class Root(object):
     @cherrypy.expose
     def search(self, query):
         out = html['search']
-        for record in members_db.search(query):
+        records = members_db.search(query)
+        out += html['message'].format(content='{} records found.'.format(len(records)))
+        for record in records:
             out += html['record'].format(**record)
         return html['template'].format(content=out)
 
@@ -250,6 +252,7 @@ class Root(object):
                 records = members_db.current()
             else:
                 records = members_db.all()
+            out += html['message'].format(content='{} records found.'.format(len(records)))
             if 'email' in args:
                 emails = ''
                 for record in records:
