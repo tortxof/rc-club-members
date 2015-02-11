@@ -327,6 +327,7 @@ class Root(object):
                 records = json.loads(json_data)
                 for record in records:
                     members_db.add(record)
+                out += html['message'].format(content='Import complete.')
             else:
                 out += html['import']
         else:
