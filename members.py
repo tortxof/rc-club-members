@@ -170,14 +170,16 @@ members_db = MembersDatabase()
 class Root(object):
     @cherrypy.expose
     def index(self):
+        out = ''
         if not os.path.isfile(members_db.dbfile):
-            out = html['setup']
+            out += html['message'].format(content='No database file found. Create new user.')
+            out += html['setup']
         else:
             if loggedIn():
-                out = html['search']
+                out += html['search']
                 out += html['add'].format(expire=members_db.end_of_year())
             else:
-                out = html['login']
+                out += html['login']
         return html['template'].format(content=out)
 
     @cherrypy.expose
@@ -187,7 +189,7 @@ class Root(object):
             members_db.new_db()
             members_db.new_appuser(user, password)
             out += html['message'].format(content='Setup complete.')
-            out += html['search']
+            out += html['login']
         else:
             out += html['message'].format(content='Setup is already complete.')
         return html['template'].format(content=out)
