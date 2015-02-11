@@ -250,6 +250,20 @@ class Root(object):
         return html['template'].format(content=out)
 
     @cherrypy.expose
+    def edit(self, rowid, **kwargs):
+        out = ''
+        if loggedIn():
+            if len(kwargs.keys()) > 0:
+                members_db.edit(kwargs)
+                out += html['message'].format(content='Record updated.')
+                out += html['record'].format(**members_db.get(rowid))
+            else:
+                out += html['edit'].format(**members_db.get(rowid))
+        else:
+            out += html['message'].format(content='You must log in to edit records.')
+        return html['template'].format(content=out)
+
+    @cherrypy.expose
     def delete(self, rowid, confirm=False):
         out = ''
         if loggedIn():
