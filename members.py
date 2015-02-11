@@ -129,6 +129,18 @@ class MembersDatabase(object):
         conn.close()
         return [dict(zip(self.fields, record)) for record in records]
 
+    def expired(self):
+        conn = sqlite3.connect(self.dbfile)
+        records = conn.execute('select *,rowid from members where expire<date("now")').fetchall()
+        conn.close()
+        return [dict(zip(self.fields, record)) for record in records]
+
+    def current(self):
+        conn = sqlite3.connect(self.dbfile)
+        records = conn.execute('select *,rowid from members where expire>=date("now")').fetchall()
+        conn.close()
+        return [dict(zip(self.fields, record)) for record in records]
+
     def search(self, query):
         conn = sqlite3.connect(self.dbfile)
         records = conn.execute('select *,rowid from members where members match ?', (query,)).fetchall()
