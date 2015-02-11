@@ -141,6 +141,12 @@ class MembersDatabase(object):
         conn.close()
         return [dict(zip(self.fields, record)) for record in records]
 
+    def end_of_year(self):
+        conn = sqlite3.connect(':memory:')
+        out = conn.execute('select date("now","+1 year","start of year","-1 day")').fetchone()[0]
+        conn.close()
+        return out
+
     def search(self, query):
         conn = sqlite3.connect(self.dbfile)
         records = conn.execute('select *,rowid from members where members match ?', (query,)).fetchall()
