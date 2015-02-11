@@ -114,6 +114,14 @@ class MembersDatabase(object):
         conn.close()
         return rowid
 
+    def edit(self, rowid, record):
+        conn = sqlite3.connect(self.dbfile)
+        fields = tuple(record.get(field) for field in self.fields[:-1])
+        set_string = ','.join([field + '=?' for field in self.fields[:-1]])
+        conn.execute('update members set ' + set_string + ' where rowid=?', fields + (rowid,))
+        conn.commit()
+        conn.close()
+
     def remove(self, rowid):
         conn = sqlite3.connect(self.dbfile)
         conn.execute('delete from members where rowid=?', (rowid,))
@@ -254,7 +262,7 @@ class Root(object):
         out = ''
         if loggedIn():
             if len(kwargs.keys()) > 0:
-                members_db.edit(kwargs)
+                members_db.edit(rowid=rowid, record=kwargs)
                 out += html['message'].format(content='Record updated.')
                 out += html['record'].format(**members_db.get(rowid))
             else:
