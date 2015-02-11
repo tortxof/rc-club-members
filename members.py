@@ -217,7 +217,7 @@ class Root(object):
     def add(self, **kwargs):
         out = ''
         if loggedIn():
-            if 'first' in kwargs.keys():
+            if len(kwargs.keys()) > 0:
                 members_db.add(kwargs)
                 out += html['message'].format(content='Record added.')
             else:
