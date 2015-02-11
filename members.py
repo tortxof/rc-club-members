@@ -87,7 +87,7 @@ class MembersDatabase(object):
 
     def new_db(self):
         conn = sqlite3.connect(self.dbfile)
-        conn.execute('create virtual table members using fts4(' + ', '.join(self.fields[:-1]) + ')')
+        conn.execute('create virtual table members using fts4(' + ', '.join(self.fields[:-1]) + ', notindexed=expire)')
         conn.execute('create table appusers (appuser text primary key not null, password text)')
         conn.commit()
         conn.close()
