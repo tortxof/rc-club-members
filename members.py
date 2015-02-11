@@ -145,6 +145,7 @@ class Root(object):
         else:
             if loggedIn():
                 out = html['search']
+                out += html['add']
             else:
                 out = html['login']
         return html['template'].format(content=out)
