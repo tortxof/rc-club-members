@@ -4,6 +4,7 @@ import os
 import subprocess
 import codecs
 import time
+import json
 import sqlite3
 
 import bcrypt
@@ -315,6 +316,28 @@ class Root(object):
         else:
             out += html['message'].format(content='You must log in to delete records.')
         return html['template'].format(content=out)
+
+    @cherrypy.expose('import')
+    def json_import(self, json_data=None):
+        out = ''
+        if loggedIn():
+            if json_data:
+                records = json.loads(json_data)
+                for record in records:
+                    members_db.add(record)
+            else:
+                out += html['import']
+        else:
+            out += html['message'].format(content='You must log in to import records.')
+        return html['template'].format(content=out)
+
+    @cherrypy.expose('export')
+    @cherrypy.tools.json_out()
+    def json_export(self):
+        if loggedIn():
+            return members_db.all()
+        else:
+            raise cherrypy.HTTPError(401)
 
 cherrypy.config.update('server.conf')
 
