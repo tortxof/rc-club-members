@@ -107,9 +107,12 @@ class MembersDatabase(object):
 
     def add(self, record):
         conn = sqlite3.connect(self.dbfile)
-        conn.execute('insert into members values(' + ', '.join('?' * (len(self.fields) - 1)) + ')', tuple(record.get(field) for field in self.fields[:-1]))
+        cur = conn.cursor()
+        cur.execute('insert into members values(' + ', '.join('?' * (len(self.fields) - 1)) + ')', tuple(record.get(field) for field in self.fields[:-1]))
+        rowid = cur.lastrowid
         conn.commit()
         conn.close()
+        return rowid
 
     def remove(self, rowid):
         conn = sqlite3.connect(self.dbfile)
@@ -237,8 +240,9 @@ class Root(object):
         out = ''
         if loggedIn():
             if len(kwargs.keys()) > 0:
-                members_db.add(kwargs)
+                rowid = members_db.add(kwargs)
                 out += html['message'].format(content='Record added.')
+                out += html['record'].format(**members_db.get(rowid))
             else:
                 out += html['add'].format(expire=members_db.end_of_year())
         else:
