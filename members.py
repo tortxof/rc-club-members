@@ -163,7 +163,7 @@ class Root(object):
         else:
             if loggedIn():
                 out = html['search']
-                out += html['add']
+                out += html['add'].format(expire=members_db.end_of_year())
             else:
                 out = html['login']
         return html['template'].format(content=out)
@@ -240,7 +240,7 @@ class Root(object):
                 members_db.add(kwargs)
                 out += html['message'].format(content='Record added.')
             else:
-                out += html['add']
+                out += html['add'].format(expire=members_db.end_of_year())
         else:
             out += html['message'].format(content='You must log in to add records.')
         return html['template'].format(content=out)
