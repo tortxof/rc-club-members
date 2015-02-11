@@ -107,7 +107,7 @@ class MembersDatabase(object):
 
     def add(self, record):
         conn = sqlite3.connect(self.dbfile)
-        conn.execute('insert into members values(' + ', '.join('?' * (len(self.fields) - 1)) + ')', record)
+        conn.execute('insert into members values(' + ', '.join('?' * (len(self.fields) - 1)) + ')', tuple(record.get(field) for field in self.fields[:-1]))
         conn.commit()
         conn.close()
 
@@ -143,7 +143,10 @@ class Root(object):
         if not os.path.isfile(members_db.dbfile):
             out = html['setup']
         else:
-            out = html['search']
+            if loggedIn():
+                out = html['search']
+            else:
+                out = html['login']
         return html['template'].format(content=out)
 
     @cherrypy.expose
@@ -211,14 +214,11 @@ class Root(object):
         return html['template'].format(content=out)
 
     @cherrypy.expose
-    def add(self, pdf_file=None):
+    def add(self, **kwargs):
         out = ''
         if loggedIn():
-            if pdf_file:
-                filename = pdf_file.filename
-                content = pdftotext(pdf_file.file.read())
-                content = ' '.join(content.split())
-                members_db.add(filename, content)
+            if 'first' in kwargs.keys():
+                members_db.add(kwargs)
                 out += html['message'].format(content='Record added.')
             else:
                 out += html['add']
