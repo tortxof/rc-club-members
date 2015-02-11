@@ -121,7 +121,7 @@ class MembersDatabase(object):
         conn = sqlite3.connect(self.dbfile)
         record = conn.execute('select *,rowid from members where rowid=?', (rowid,)).fetchone()
         conn.close()
-        return record
+        return dict(zip(self.fields, record))
 
     def all(self):
         conn = sqlite3.connect(self.dbfile)
@@ -224,6 +224,22 @@ class Root(object):
                 out += html['add']
         else:
             out += html['message'].format(content='You must log in to add records.')
+        return html['template'].format(content=out)
+
+    @cherrypy.expose
+    def delete(self, rowid, confirm=False):
+        out = ''
+        if loggedIn():
+            if confirm == 'true':
+                out += html['record'].format(**members_db.get(rowid))
+                out += html['message'].format(content='Record has been deleted.')
+                members_db.remove(rowid)
+            else:
+                out += html['record'].format(**members_db.get(rowid))
+                out += html['message'].format(content='Are you sure you want to delete this record?')
+                out += html['confirm_delete'].format(rowid=rowid)
+        else:
+            out += html['message'].format(content='You must log in to delete records.')
         return html['template'].format(content=out)
 
 cherrypy.config.update('server.conf')
