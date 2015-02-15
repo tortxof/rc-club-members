@@ -343,6 +343,13 @@ class Root(object):
         else:
             raise cherrypy.HTTPError(401)
 
+    @cherrypy.expose
+    def about(self):
+        version = subprocess.check_output(['git','rev-parse','--short','HEAD']).decode().strip()
+        out = html['about'].format(version=version)
+        return html['template'].format(content=out)
+
+
 cherrypy.config.update('server.conf')
 
 if __name__ == '__main__':
