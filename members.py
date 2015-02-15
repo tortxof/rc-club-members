@@ -4,6 +4,8 @@ import os
 import subprocess
 import codecs
 import time
+import io
+import csv
 import json
 import sqlite3
 
@@ -258,6 +260,14 @@ class Root(object):
                 for record in records:
                     emails += record['email'] + '\n'
                 out += html['text'].format(content=emails)
+            elif 'csv' in args:
+                csv_data = io.StringIO()
+                writer = csv.DictWriter(csv_data, fieldnames=members_db.fields[:-1])
+                writer.writeheader()
+                for record in records:
+                    del record['rowid']
+                    writer.writerow(record)
+                out += html['text'].format(content=csv_data.getvalue())
             else:
                 for record in records:
                     out += html['record'].format(**record)
