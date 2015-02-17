@@ -1,2 +1,4 @@
 cherrypy
 py-bcrypt
+beautifulsoup4
+requests
