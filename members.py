@@ -87,6 +87,7 @@ auth_keys = AuthKeys()
 
 class MembersDatabase(object):
     def __init__(self):
+        self.sort_sql = ' order by expire desc, last asc, first asc'
         self.dbfile = 'members.db'
         self.fields = ('first', 'last', 'ama', 'phone', 'address', 'city', 'state', 'zip', 'email', 'expire', 'rowid')
 
@@ -141,19 +142,19 @@ class MembersDatabase(object):
 
     def all(self):
         conn = sqlite3.connect(self.dbfile)
-        records = conn.execute('select *,rowid from members').fetchall()
+        records = conn.execute('select *,rowid from members' + self.sort_sql).fetchall()
         conn.close()
         return [dict(zip(self.fields, record)) for record in records]
 
     def expired(self):
         conn = sqlite3.connect(self.dbfile)
-        records = conn.execute('select *,rowid from members where expire<date("now")').fetchall()
+        records = conn.execute('select *,rowid from members where expire<date("now")' + self.sort_sql).fetchall()
         conn.close()
         return [dict(zip(self.fields, record)) for record in records]
 
     def current(self):
         conn = sqlite3.connect(self.dbfile)
-        records = conn.execute('select *,rowid from members where expire>=date("now")').fetchall()
+        records = conn.execute('select *,rowid from members where expire>=date("now")' + self.sort_sql).fetchall()
         conn.close()
         return [dict(zip(self.fields, record)) for record in records]
 
@@ -165,7 +166,7 @@ class MembersDatabase(object):
 
     def search(self, query):
         conn = sqlite3.connect(self.dbfile)
-        records = conn.execute('select *,rowid from members where members match ?', (query,)).fetchall()
+        records = conn.execute('select *,rowid from members where members match ?' + self.sort_sql, (query,)).fetchall()
         conn.close()
         return [dict(zip(self.fields, record)) for record in records]
 
