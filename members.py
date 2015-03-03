@@ -89,74 +89,87 @@ class MembersDatabase(object):
     def __init__(self):
         self.sort_sql = ' order by expire desc, last asc, first asc'
         self.dbfile = 'members.db'
-        self.fields = ('first', 'last', 'ama', 'phone', 'address', 'city', 'state', 'zip', 'email', 'expire', 'rowid')
+
+    def db_conn(self):
+        conn = sqlite3.connect(self.dbfile)
+        conn.row_factory = sqlite3.Row
+        return conn
+
+    def get_fields(self):
+        conn = self.db_conn()
+        r = conn.execute('pragma table_info(members)').fetchall()
+        fields =  tuple(i['name'] for i in r)
+        conn.close()
+        return fields
 
     def new_db(self):
-        conn = sqlite3.connect(self.dbfile)
-        conn.execute('create virtual table members using fts4(' + ', '.join(self.fields[:-1]) + ', notindexed=expire)')
+        conn = self.db_conn()
+        conn.execute('create virtual table members using fts4(first, last, ama, phone, address, city, state, zip, email, expire, notindexed=expire)')
         conn.execute('create table appusers (appuser text primary key not null, password text)')
         conn.commit()
         conn.close()
 
     def new_appuser(self, appuser, password):
         password = bcrypt.hashpw(password, bcrypt.gensalt())
-        conn = sqlite3.connect(self.dbfile)
+        conn = self.db_conn()
         conn.execute('insert into appusers values(?, ?)', (appuser, password))
         conn.commit()
         conn.close()
 
     def password_valid(self, appuser, password):
-        conn = sqlite3.connect(self.dbfile)
+        conn = self.db_conn()
         stored_password = conn.execute('select password from appusers where appuser=?', (appuser,)).fetchone()[0]
         conn.close()
         return bcrypt.checkpw(password, stored_password)
 
     def add(self, record):
-        conn = sqlite3.connect(self.dbfile)
+        conn = self.db_conn()
+        fields = self.get_fields()
         cur = conn.cursor()
-        cur.execute('insert into members values(' + ', '.join('?' * (len(self.fields) - 1)) + ')', tuple(record.get(field) for field in self.fields[:-1]))
+        cur.execute('insert into members values(' + ', '.join('?' * len(fields)) + ')', tuple(record.get(field) for field in fields))
         rowid = cur.lastrowid
         conn.commit()
         conn.close()
         return rowid
 
     def edit(self, rowid, record):
-        conn = sqlite3.connect(self.dbfile)
-        fields = tuple(record.get(field) for field in self.fields[:-1])
-        set_string = ','.join([field + '=?' for field in self.fields[:-1]])
-        conn.execute('update members set ' + set_string + ' where rowid=?', fields + (rowid,))
+        conn = self.db_conn()
+        fields = self.get_fields()
+        record = tuple(record.get(field) for field in fields)
+        set_string = ','.join([field + '=?' for field in fields])
+        conn.execute('update members set ' + set_string + ' where rowid=?', record + (rowid,))
         conn.commit()
         conn.close()
 
     def remove(self, rowid):
-        conn = sqlite3.connect(self.dbfile)
+        conn = self.db_conn()
         conn.execute('delete from members where rowid=?', (rowid,))
         conn.commit()
         conn.close()
 
     def get(self, rowid):
-        conn = sqlite3.connect(self.dbfile)
+        conn = self.db_conn()
         record = conn.execute('select *,rowid from members where rowid=?', (rowid,)).fetchone()
         conn.close()
-        return dict(zip(self.fields, record))
+        return dict(record)
 
     def all(self):
-        conn = sqlite3.connect(self.dbfile)
+        conn = self.db_conn()
         records = conn.execute('select *,rowid from members' + self.sort_sql).fetchall()
         conn.close()
-        return [dict(zip(self.fields, record)) for record in records]
+        return [dict(record) for record in records]
 
     def expired(self):
-        conn = sqlite3.connect(self.dbfile)
+        conn = self.db_conn()
         records = conn.execute('select *,rowid from members where expire<date("now")' + self.sort_sql).fetchall()
         conn.close()
-        return [dict(zip(self.fields, record)) for record in records]
+        return [dict(record) for record in records]
 
     def current(self):
-        conn = sqlite3.connect(self.dbfile)
+        conn = self.db_conn()
         records = conn.execute('select *,rowid from members where expire>=date("now")' + self.sort_sql).fetchall()
         conn.close()
-        return [dict(zip(self.fields, record)) for record in records]
+        return [dict(record) for record in records]
 
     def end_of_year(self):
         conn = sqlite3.connect(':memory:')
@@ -165,10 +178,10 @@ class MembersDatabase(object):
         return out
 
     def search(self, query):
-        conn = sqlite3.connect(self.dbfile)
+        conn = self.db_conn()
         records = conn.execute('select *,rowid from members where members match ?' + self.sort_sql, (query,)).fetchall()
         conn.close()
-        return [dict(zip(self.fields, record)) for record in records]
+        return [dict(record) for record in records]
 
 members_db = MembersDatabase()
 
@@ -265,7 +278,7 @@ class Root(object):
                 out += html['text'].format(content=emails)
             elif 'csv' in args:
                 csv_data = io.StringIO()
-                writer = csv.DictWriter(csv_data, fieldnames=members_db.fields[:-1])
+                writer = csv.DictWriter(csv_data, fieldnames=members_db.get_fields())
                 writer.writeheader()
                 for record in records:
                     del record['rowid']
