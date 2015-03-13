@@ -74,12 +74,12 @@
   </nav>
 
   <div class="container">
-    {content}
+    {% block body %}{% endblock %}
   </div><!-- /.container -->
 
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
   <script src="/static/js/bootstrap.min.js"></script>
   <script src="/static/js/datedropper/datedropper.min.js"></script>
-  <script>$( "#expire" ).dateDropper({{format: "Y-m-d", maxYear: 2030, animate_current: false}});</script>
+  <script>$( "#expire" ).dateDropper({format: "Y-m-d", maxYear: 2030, animate_current: false});</script>
 </body>
 </html>
