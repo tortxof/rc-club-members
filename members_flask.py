@@ -184,6 +184,21 @@ def json_import():
         flash('You are not logged in.')
         return redirect(url_for('login'))
 
+@app.route('/verify')
+def verify():
+    if 'appuser' in session:
+        record = members_db.get(request.args.get('rowid'))[0]
+        ama_url = 'http://www.modelaircraft.org/MembershipQuery.aspx'
+        ama_page = requests.get(ama_url)
+        soup = BeautifulSoup(ama_page.text)
+        viewstate = soup.find_all('input', attrs={'name':'__VIEWSTATE'})[0]['value']
+        eventvalidation = soup.find_all('input', attrs={'name':'__EVENTVALIDATION'})[0]['value']
+        flash('By clicking Verify you will be submitting the following name and AMA number on modelaircraft.org to verify membership.')
+        return render_template('verify.html', record=record, eventvalidation=eventvalidation, viewstate=viewstate)
+    else:
+        flash('You are not logged in.')
+        return redirect(url_for('login'))
+
 @app.route('/about')
 def about():
     version = subprocess.check_output(['git','rev-parse','--short','HEAD']).decode().strip()
