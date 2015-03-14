@@ -1,3 +1,7 @@
+import sqlite3
+
+import bcrypt
+
 class MembersDatabase(object):
     def __init__(self):
         self.sort_sql = ' order by expire desc, last asc, first asc'
@@ -31,9 +35,9 @@ class MembersDatabase(object):
 
     def password_valid(self, appuser, password):
         conn = self.db_conn()
-        stored_password = conn.execute('select password from appusers where appuser=?', (appuser,)).fetchone()[0]
+        pw_hash = conn.execute('select password from appusers where appuser=?', (appuser,)).fetchone()[0]
         conn.close()
-        return bcrypt.checkpw(password, stored_password)
+        return bcrypt.hashpw(password, pw_hash) == pw_hash
 
     def add(self, record):
         conn = self.db_conn()
