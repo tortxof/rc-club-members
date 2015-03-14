@@ -64,7 +64,7 @@ class MembersDatabase(object):
         conn = self.db_conn()
         record = conn.execute('select *,rowid from members where rowid=?', (rowid,)).fetchone()
         conn.close()
-        return dict(record)
+        return [dict(record)]
 
     def all(self):
         conn = self.db_conn()
