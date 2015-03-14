@@ -65,6 +65,23 @@ def add():
         flash('You are not logged in.')
         return redirect(url_for('login'))
 
+@app.route('/delete', methods=['GET', 'POST'])
+def delete():
+    if 'appuser' in session:
+        if request.method == 'POST':
+            rowid = request.form.get('rowid')
+            flash('Record deleted.')
+            out = render_template('records.html', records=members_db.get(rowid))
+            members_db.remove(rowid)
+            return out
+        else:
+            rowid = request.args.get('rowid')
+            flash('Are you sure you want to delete this record?')
+            return render_template('confirm_delete.html', records=members_db.get(rowid), rowid=rowid)
+    else:
+        flash('You are not logged in.')
+        return redirect(url_for('login'))
+
 if __name__ == '__main__':
     app.debug = True
     app.secret_key = b']\xcaS\x83w\x07\x0f\xef1}\xd4ed\x1fv\xe5z)\x9b3\x10\xbeSA"\xe6\xb4d\x8a<\x9eo'
