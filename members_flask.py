@@ -55,6 +55,19 @@ def logout():
     flash('You have been logged out.')
     return redirect(url_for('login'))
 
+@app.route('/new-user', methods=['GET', 'POST'])
+def new_user():
+    if 'appuser' in session:
+        if request.method == 'POST':
+            members_db.new_appuser(request.form['appuser'], request.form['password'])
+            flash('New user created.')
+            return redirect(url_for('index'))
+        else:
+            return render_template('new_user.html')
+    else:
+        flash('You are not logged in.')
+        return redirect(url_for('index'))
+
 @app.route('/search')
 def search():
     if 'appuser' in session:
