@@ -1,6 +1,7 @@
 #! /usr/bin/env python3
 
 import os
+import subprocess
 import io
 import csv
 import json
@@ -182,6 +183,11 @@ def json_import():
     else:
         flash('You are not logged in.')
         return redirect(url_for('login'))
+
+@app.route('/about')
+def about():
+    version = subprocess.check_output(['git','rev-parse','--short','HEAD']).decode().strip()
+    return render_template('about.html', version=version)
 
 if __name__ == '__main__':
     app.debug = True

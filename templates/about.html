@@ -1,10 +1,12 @@
+{% extends 'layout.html' %}
+{% block body %}
 <h1>rc-club-members</h1>
 
 <h2><small>A web app for managing members of an RC club.</small></h2>
 
 <p>View source on <a href="https://github.com/tortxof/rc-club-members">github</a>.</p>
 
-<p>Version: <samp>{version}</samp></p>
+<p>Version: <samp>{{ version }}</samp></p>
 
 <p>The MIT License (MIT)</p>
 
@@ -33,3 +35,4 @@
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
   THE SOFTWARE.
 </p>
+{% endblock %}
