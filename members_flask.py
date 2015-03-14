@@ -15,7 +15,7 @@ app = Flask(__name__)
 @app.route('/')
 def index():
     if 'appuser' in session:
-        return render_template('index.html')
+        return render_template('index.html', expire=members_db.end_of_year())
     else:
         return redirect(url_for('login'))
 
@@ -51,6 +51,19 @@ def logout():
     session.pop('appuser', None)
     flash('You have been logged out.')
     return redirect(url_for('login'))
+
+@app.route('/add', methods=['GET', 'POST'])
+def add():
+    if 'appuser' in session:
+        if request.method == 'POST':
+            rowid = members_db.add(request.form)
+            flash('Record added.')
+            return render_template('records.html', records=members_db.get(rowid))
+        else:
+            return redirect(url_for('index'))
+    else:
+        flash('You are not logged in.')
+        return redirect(url_for('login'))
 
 if __name__ == '__main__':
     app.debug = True
