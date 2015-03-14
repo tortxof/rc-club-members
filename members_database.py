@@ -27,7 +27,7 @@ class MembersDatabase(object):
         conn.close()
 
     def new_appuser(self, appuser, password):
-        password = bcrypt.hashpw(password, bcrypt.gensalt())
+        password = bcrypt.hashpw(password.encode(), bcrypt.gensalt())
         conn = self.db_conn()
         conn.execute('insert into appusers values(?, ?)', (appuser, password))
         conn.commit()
@@ -37,7 +37,7 @@ class MembersDatabase(object):
         conn = self.db_conn()
         pw_hash = conn.execute('select password from appusers where appuser=?', (appuser,)).fetchone()[0]
         conn.close()
-        return bcrypt.hashpw(password, pw_hash) == pw_hash
+        return bcrypt.hashpw(password.encode(), pw_hash) == pw_hash
 
     def add(self, record):
         conn = self.db_conn()

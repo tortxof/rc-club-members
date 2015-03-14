@@ -63,8 +63,10 @@
               <li><a href="/import">Import</a></li>
               <li><a href="/export">Export</a></li>
               <li class="divider"></li>
-              <li><a href="/logout">Log Out</a></li>
+              {% if session['appuser'] %}
+              <li><a href="/logout">Log Out {{ session['appuser'] }}</a></li>
               <li class="divider"></li>
+              {% endif %}
               <li><a href="/about">About</a></li>
             </ul>
           </li>
@@ -74,6 +76,13 @@
   </nav>
 
   <div class="container">
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        {% for message in messages %}
+          <div class="alert alert-info" role="alert">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
     {% block body %}{% endblock %}
   </div><!-- /.container -->
 
