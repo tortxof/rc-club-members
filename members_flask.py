@@ -54,6 +54,16 @@ def logout():
     flash('You have been logged out.')
     return redirect(url_for('login'))
 
+@app.route('/search')
+def search():
+    if 'appuser' in session:
+        records = members_db.search(request.args.get('query'))
+        flash('{} records found.'.format(len(records)))
+        return render_template('records.html', records=records)
+    else:
+        flash('You are not logged in.')
+        return redirect(url_for('login'))
+
 @app.route('/add', methods=['GET', 'POST'])
 def add():
     if 'appuser' in session:
