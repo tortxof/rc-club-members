@@ -49,6 +49,14 @@ class MembersDatabase(object):
         conn.close()
         return rowid
 
+    def add_multiple(self, records):
+        conn = self.db_conn()
+        fields = self.get_fields()
+        for record in records:
+            conn.execute('insert into members values(' + ', '.join('?' * len(fields)) + ')', tuple(record.get(field) for field in fields))
+        conn.commit()
+        conn.close()
+
     def edit(self, rowid, record):
         conn = self.db_conn()
         fields = self.get_fields()

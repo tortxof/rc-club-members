@@ -3,10 +3,11 @@
 import os
 import io
 import csv
+import json
 
 import requests
 from bs4 import BeautifulSoup
-from flask import Flask, session, render_template, flash, request, redirect, url_for
+from flask import Flask, session, render_template, flash, request, redirect, url_for, jsonify
 
 import members_database
 
@@ -142,6 +143,29 @@ def all(args):
         else:
             return render_template('records.html', records=records)
 
+    else:
+        flash('You are not logged in.')
+        return redirect(url_for('login'))
+
+@app.route('/export')
+def json_export():
+    if 'appuser' in session:
+        return jsonify(records=members_db.all())
+    else:
+        flash('You are not logged in.')
+        return redirect(url_for('login'))
+
+@app.route('/import', methods=['GET', 'POST'])
+def json_import():
+    if 'appuser' in session:
+        if request.method == 'POST':
+            json_data = request.form['json_data']
+            records = json.loads(json_data).get('records')
+            members_db.add_multiple(records)
+            flash('{} records imported.'.format(len(records)))
+            return redirect(url_for('index'))
+        else:
+            return render_template('import.html')
     else:
         flash('You are not logged in.')
         return redirect(url_for('login'))
