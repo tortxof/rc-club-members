@@ -1,6 +1,8 @@
 #! /usr/bin/env python3
 
 import os
+import io
+import csv
 
 import requests
 from bs4 import BeautifulSoup
@@ -78,6 +80,43 @@ def delete():
             rowid = request.args.get('rowid')
             flash('Are you sure you want to delete this record?')
             return render_template('confirm_delete.html', records=members_db.get(rowid), rowid=rowid)
+    else:
+        flash('You are not logged in.')
+        return redirect(url_for('login'))
+
+@app.route('/all', defaults={'args': ''})
+@app.route('/all/<path:args>')
+def all(args):
+    if 'appuser' in session:
+        args = args.split('/')
+
+        if 'expired' in args:
+            records = members_db.expired()
+        elif 'current' in args:
+            records = members_db.current()
+        else:
+            records = members_db.all()
+
+        flash('{} records found.'.format(len(records)))
+
+        if 'email' in args:
+            emails = ''
+            for record in records:
+                email = record['email']
+                if len(email) > 0:
+                    emails += email + '\n'
+            return render_template('text.html', content=emails)
+        elif 'csv' in args:
+            csv_data = io.StringIO()
+            writer = csv.DictWriter(csv_data, fieldnames=members_db.get_fields())
+            writer.writeheader()
+            for record in records:
+                del record['rowid']
+                writer.writerow(record)
+            return render_template('text.html', content=csv_data.getvalue())
+        else:
+            return render_template('records.html', records=records)
+
     else:
         flash('You are not logged in.')
         return redirect(url_for('login'))
