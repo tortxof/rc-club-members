@@ -67,6 +67,21 @@ def add():
         flash('You are not logged in.')
         return redirect(url_for('login'))
 
+@app.route('/edit', methods=['GET', 'POST'])
+def edit():
+    if 'appuser' in session:
+        if request.method == 'POST':
+            rowid = request.form['rowid']
+            members_db.edit(rowid=rowid, record=request.form)
+            flash('Record updated.')
+            return render_template('records.html', records=members_db.get(rowid))
+        else:
+            rowid = request.args.get('rowid')
+            return render_template('edit.html', record=members_db.get(rowid)[0])
+    else:
+        flash('You are not logged in.')
+        return redirect(url_for('login'))
+
 @app.route('/delete', methods=['GET', 'POST'])
 def delete():
     if 'appuser' in session:
@@ -123,5 +138,5 @@ def all(args):
 
 if __name__ == '__main__':
     app.debug = True
-    app.secret_key = b']\xcaS\x83w\x07\x0f\xef1}\xd4ed\x1fv\xe5z)\x9b3\x10\xbeSA"\xe6\xb4d\x8a<\x9eo'
+    app.secret_key = os.urandom(32)
     app.run()

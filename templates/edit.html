@@ -1,78 +1,80 @@
+{% extends 'layout.html' %}
+{% block body %}
 <div class="panel panel-default">
   <div class="panel-heading">Edit Record</div>
   <div class="panel-body">
 
     <form class="form-horizontal" role="form" name="edit" enctype="multipart/form-data" action="/edit" method="post">
 
-      <input type="hidden" name="rowid" value="{rowid}">
+      <input type="hidden" name="rowid" value="{{ record.rowid }}">
 
       <div class="form-group">
         <label class="col-sm-3 control-label">First</label>
         <div class="col-sm-9">
-          <input class="form-control" type="text" name="first" value="{first}">
+          <input class="form-control" type="text" name="first" value="{{ record.first }}">
         </div>
       </div>
 
       <div class="form-group">
         <label class="col-sm-3 control-label">Last</label>
         <div class="col-sm-9">
-          <input class="form-control" type="text" name="last" value="{last}">
+          <input class="form-control" type="text" name="last" value="{{ record.last }}">
         </div>
       </div>
 
       <div class="form-group">
         <label class="col-sm-3 control-label">AMA</label>
         <div class="col-sm-9">
-          <input class="form-control" type="text" name="ama" value="{ama}">
+          <input class="form-control" type="text" name="ama" value="{{ record.ama }}">
         </div>
       </div>
 
       <div class="form-group">
         <label class="col-sm-3 control-label">Phone</label>
         <div class="col-sm-9">
-          <input class="form-control" type="text" name="phone" value="{phone}">
+          <input class="form-control" type="text" name="phone" value="{{ record.phone }}">
         </div>
       </div>
 
       <div class="form-group">
         <label class="col-sm-3 control-label">Address</label>
         <div class="col-sm-9">
-          <input class="form-control" type="text" name="address" value="{address}">
+          <input class="form-control" type="text" name="address" value="{{ record.address }}">
         </div>
       </div>
 
       <div class="form-group">
         <label class="col-sm-3 control-label">City</label>
         <div class="col-sm-9">
-          <input class="form-control" type="text" name="city" value="{city}">
+          <input class="form-control" type="text" name="city" value="{{ record.city }}">
         </div>
       </div>
 
       <div class="form-group">
         <label class="col-sm-3 control-label">State</label>
         <div class="col-sm-9">
-          <input class="form-control" type="text" name="state" value="{state}">
+          <input class="form-control" type="text" name="state" value="{{ record.state }}">
         </div>
       </div>
 
       <div class="form-group">
         <label class="col-sm-3 control-label">Zip</label>
         <div class="col-sm-9">
-          <input class="form-control" type="text" name="zip" value="{zip}">
+          <input class="form-control" type="text" name="zip" value="{{ record.zip }}">
         </div>
       </div>
 
       <div class="form-group">
         <label class="col-sm-3 control-label">Email</label>
         <div class="col-sm-9">
-          <input class="form-control" type="email" name="email" value="{email}">
+          <input class="form-control" type="email" name="email" value="{{ record.email }}">
         </div>
       </div>
 
       <div class="form-group">
         <label class="col-sm-3 control-label">Expire</label>
         <div class="col-sm-9">
-          <input class="form-control" type="text" id="expire" name="expire" value="{expire}">
+          <input class="form-control" type="text" id="expire" name="expire" value="{{ record.expire }}">
         </div>
       </div>
 
@@ -82,3 +84,4 @@
 
   </div>
 </div>
+{% endblock %}
