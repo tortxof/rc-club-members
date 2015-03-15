@@ -15,6 +15,14 @@ import members_database
 
 members_db = members_database.MembersDatabase()
 
+app = Flask(__name__)
+
+if os.path.isfile('app.conf'):
+    app.config.from_pyfile('app.conf')
+else:
+    app.debug = True
+    app.secret_key = os.urandom(32)
+
 def login_required(f):
     @wraps(f)
     def wrapper(*args, **kwargs):
@@ -24,8 +32,6 @@ def login_required(f):
             flash('You are not logged in.')
             return redirect(url_for('login'))
     return wrapper
-
-app = Flask(__name__)
 
 @app.route('/')
 @login_required
@@ -187,6 +193,4 @@ def about():
     return render_template('about.html', version=version)
 
 if __name__ == '__main__':
-    app.debug = True
-    app.secret_key = os.urandom(32)
     app.run()
