@@ -1,5 +1,5 @@
 rc-club-members
 ===============
 
-A CherryPy app for managing members of an RC club.
---------------------------------------------------
+A flask app for managing members of an RC club.
+-----------------------------------------------
