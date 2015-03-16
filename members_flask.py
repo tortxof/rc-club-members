@@ -110,7 +110,12 @@ def edit():
         return render_template('records.html', records=members_db.get(rowid))
     else:
         rowid = request.args.get('rowid')
-        return render_template('edit.html', record=members_db.get(rowid)[0])
+        records = members_db.get(rowid)
+        if records:
+            return render_template('edit.html', record=records[0])
+        else:
+            flash('Record not found.')
+            return redirect(url_for('index'))
 
 @app.route('/delete', methods=['GET', 'POST'])
 @login_required
@@ -123,8 +128,13 @@ def delete():
         return out
     else:
         rowid = request.args.get('rowid')
-        flash('Are you sure you want to delete this record?')
-        return render_template('confirm_delete.html', records=members_db.get(rowid), rowid=rowid)
+        records = members_db.get(rowid)
+        if records:
+            flash('Are you sure you want to delete this record?')
+            return render_template('confirm_delete.html', records=records, rowid=rowid)
+        else:
+            flash('Record not found.')
+            return redirect(url_for('index'))
 
 @app.route('/all', defaults={'args': ''})
 @app.route('/all/<path:args>')
