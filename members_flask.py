@@ -80,6 +80,7 @@ def new_user():
         flash('New user created.')
         return redirect(url_for('index'))
     else:
+        flash('Add a new user.')
         return render_template('new_user.html')
 
 @app.route('/search')
@@ -162,14 +163,14 @@ def all(args):
 @app.route('/export')
 @login_required
 def json_export():
-    return jsonify(records=members_db.all())
+    return jsonify(members=members_db.all())
 
 @app.route('/import', methods=['GET', 'POST'])
 @login_required
 def json_import():
     if request.method == 'POST':
         json_data = request.form['json_data']
-        records = json.loads(json_data).get('records')
+        records = json.loads(json_data).get('members')
         members_db.add_multiple(records)
         flash('{} records imported.'.format(len(records)))
         return redirect(url_for('index'))
