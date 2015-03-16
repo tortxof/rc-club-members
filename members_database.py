@@ -27,8 +27,8 @@ class MembersDatabase(object):
 
     def new_db(self):
         conn = self.db_conn()
-        conn.execute('create virtual table members using fts4(id INTEGER PRIMARY KEY AUTOINCREMENT, '
-            'first, last, ama, phone, address, city, state, zip, email, expire, notindexed=expire, notindexed=id)')
+        conn.execute('create virtual table members using fts4('
+            'first, last, ama, phone, address, city, state, zip, email, expire, notindexed=expire)')
         conn.execute('create table appusers (appuser text primary key not null, password text)')
         conn.commit()
         conn.close()
@@ -47,7 +47,6 @@ class MembersDatabase(object):
         return bcrypt.hashpw(password.encode(), pw_hash) == pw_hash
 
     def add(self, record):
-        record['id'] = None
         conn = self.db_conn()
         cur = conn.cursor()
         cur.execute('insert into members values(' + self.get_fields_str() + ')', record)
@@ -60,13 +59,12 @@ class MembersDatabase(object):
         fields_str = self.get_fields_str()
         conn = self.db_conn()
         for record in records:
-            record['id'] = None
             conn.execute('insert into members values(' + fields_str + ')', record)
         conn.commit()
         conn.close()
 
     def edit(self, rowid, record):
-        fields = tuple(i for i in self.get_fields() if i != 'id')
+        fields = self.get_fields()
         record = tuple(record.get(field) for field in fields)
         set_string = ','.join(field + '=?' for field in fields)
         conn = self.db_conn()
