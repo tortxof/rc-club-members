@@ -92,7 +92,7 @@ def search():
 @login_required
 def add():
     if request.method == 'POST':
-        rowid = members_db.add(request.form)
+        rowid = members_db.add(request.form.to_dict())
         flash('Record added.')
         return render_template('records.html', records=members_db.get(rowid))
     else:
@@ -103,7 +103,7 @@ def add():
 def edit():
     if request.method == 'POST':
         rowid = request.form['rowid']
-        members_db.edit(rowid=rowid, record=request.form)
+        members_db.edit(rowid=rowid, record=request.form.to_dict())
         flash('Record updated.')
         return render_template('records.html', records=members_db.get(rowid))
     else:
@@ -114,7 +114,7 @@ def edit():
 @login_required
 def delete():
     if request.method == 'POST':
-        rowid = request.form.get('rowid')
+        rowid = request.form['rowid']
         flash('Record deleted.')
         out = render_template('records.html', records=members_db.get(rowid))
         members_db.remove(rowid)
