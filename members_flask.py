@@ -47,6 +47,7 @@ def setup():
             flash('New database created.')
             return redirect(url_for('login'))
         else:
+            flash('Create the first user.')
             return render_template('setup.html')
     else:
         flash('Database already exists.')
