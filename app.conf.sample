@@ -1,4 +1,3 @@
 DEBUG = False
 SECRET_KEY = 'Replace me with cryptographic quality random bytes like from os.urandom().'
-HOST = '127.0.0.1'
-PORT = 8000
+SERVER_NAME = 'localhost:5000'
