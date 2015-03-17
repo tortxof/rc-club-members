@@ -1,388 +1,207 @@
 #! /usr/bin/env python3
 
+from functools import wraps
 import os
 import subprocess
-import codecs
-import time
 import io
 import csv
 import json
-import sqlite3
 
-import bcrypt
 import requests
 from bs4 import BeautifulSoup
-import cherrypy
+from flask import Flask, session, render_template, flash, request, redirect, url_for, jsonify
 
-def toHex(s):
-    '''Returns hex string.'''
-    return codecs.encode(s, 'hex').decode()
+import members_database
 
-def fromHex(s):
-    '''Returns bytes.'''
-    return codecs.decode(s, 'hex')
+members_db = members_database.MembersDatabase()
 
-def genHex(length=32):
-    '''Generate random hex string.'''
-    return toHex(os.urandom(length))
+app = Flask(__name__)
 
-def loggedIn():
-    '''Checks if current auth cookie is valid.'''
-    cookie = cherrypy.request.cookie
-    if 'auth' in cookie.keys():
-        if auth_keys.valid(cookie['auth'].value):
-            return True
-    return False
+if os.path.isfile('app.conf'):
+    app.config.from_pyfile('app.conf')
+else:
+    app.debug = True
+    app.secret_key = os.urandom(32)
 
-def load_templates(template_dir):
-    templates = [template.split('.html')[0] for template in os.listdir(path=template_dir)]
-    html = dict()
-    for template in templates:
-        with open(template_dir + '/' + template + '.html') as f:
-            html[template] = f.read()
-    return html
-
-html = load_templates('templates')
-
-class AuthKeys(object):
-    def __init__(self):
-        self.keys = dict()
-        self.keyExpTime = 60 * 60
-
-    def add(self, appuser):
-        key = genHex()
-        date = int(time.time())
-        self.keys[key] = {'appuser': appuser, 'date': date}
-        return key
-
-    def delete(self, key):
-        if key in self.keys:
-            del self.keys[key]
-            return True
+def login_required(f):
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        if 'appuser' in session:
+            return f(*args, **kwargs)
         else:
-            return False
+            flash('You are not logged in.')
+            return redirect(url_for('login'))
+    return wrapper
 
-    def valid(self, key):
-        now = self.expire()
-        if key in self.keys:
-            self.keys[key]['date'] = now
-            return True
-        else:
-            return False
+@app.route('/')
+@login_required
+def index():
+    return render_template('index.html', expire=members_db.end_of_year())
 
-    def user(self, key):
-        if key in self.keys:
-            return self.keys[key]['appuser']
-
-    def expire(self):
-        now = int(time.time())
-        exp_date = now - self.keyExpTime
-        keys = list(self.keys.keys())
-        for key in keys:
-            if self.keys[key]['date'] < exp_date:
-                del self.keys[key]
-        return now
-
-auth_keys = AuthKeys()
-
-class MembersDatabase(object):
-    def __init__(self):
-        self.sort_sql = ' order by expire desc, last asc, first asc'
-        self.dbfile = 'members.db'
-
-    def db_conn(self):
-        conn = sqlite3.connect(self.dbfile)
-        conn.row_factory = sqlite3.Row
-        return conn
-
-    def get_fields(self):
-        conn = self.db_conn()
-        r = conn.execute('pragma table_info(members)').fetchall()
-        fields =  tuple(i['name'] for i in r)
-        conn.close()
-        return fields
-
-    def new_db(self):
-        conn = self.db_conn()
-        conn.execute('create virtual table members using fts4(first, last, ama, phone, address, city, state, zip, email, expire, notindexed=expire)')
-        conn.execute('create table appusers (appuser text primary key not null, password text)')
-        conn.commit()
-        conn.close()
-
-    def new_appuser(self, appuser, password):
-        password = bcrypt.hashpw(password, bcrypt.gensalt())
-        conn = self.db_conn()
-        conn.execute('insert into appusers values(?, ?)', (appuser, password))
-        conn.commit()
-        conn.close()
-
-    def password_valid(self, appuser, password):
-        conn = self.db_conn()
-        stored_password = conn.execute('select password from appusers where appuser=?', (appuser,)).fetchone()[0]
-        conn.close()
-        return bcrypt.checkpw(password, stored_password)
-
-    def add(self, record):
-        conn = self.db_conn()
-        fields = self.get_fields()
-        cur = conn.cursor()
-        cur.execute('insert into members values(' + ', '.join('?' * len(fields)) + ')', tuple(record.get(field) for field in fields))
-        rowid = cur.lastrowid
-        conn.commit()
-        conn.close()
-        return rowid
-
-    def edit(self, rowid, record):
-        conn = self.db_conn()
-        fields = self.get_fields()
-        record = tuple(record.get(field) for field in fields)
-        set_string = ','.join([field + '=?' for field in fields])
-        conn.execute('update members set ' + set_string + ' where rowid=?', record + (rowid,))
-        conn.commit()
-        conn.close()
-
-    def remove(self, rowid):
-        conn = self.db_conn()
-        conn.execute('delete from members where rowid=?', (rowid,))
-        conn.commit()
-        conn.close()
-
-    def get(self, rowid):
-        conn = self.db_conn()
-        record = conn.execute('select *,rowid from members where rowid=?', (rowid,)).fetchone()
-        conn.close()
-        return dict(record)
-
-    def all(self):
-        conn = self.db_conn()
-        records = conn.execute('select *,rowid from members' + self.sort_sql).fetchall()
-        conn.close()
-        return [dict(record) for record in records]
-
-    def expired(self):
-        conn = self.db_conn()
-        records = conn.execute('select *,rowid from members where expire<date("now")' + self.sort_sql).fetchall()
-        conn.close()
-        return [dict(record) for record in records]
-
-    def current(self):
-        conn = self.db_conn()
-        records = conn.execute('select *,rowid from members where expire>=date("now")' + self.sort_sql).fetchall()
-        conn.close()
-        return [dict(record) for record in records]
-
-    def end_of_year(self):
-        conn = sqlite3.connect(':memory:')
-        out = conn.execute('select date("now","+1 year","start of year","-1 day")').fetchone()[0]
-        conn.close()
-        return out
-
-    def search(self, query):
-        conn = self.db_conn()
-        records = conn.execute('select *,rowid from members where members match ?' + self.sort_sql, (query,)).fetchall()
-        conn.close()
-        return [dict(record) for record in records]
-
-members_db = MembersDatabase()
-
-class Root(object):
-    @cherrypy.expose
-    def index(self):
-        out = ''
-        if not os.path.isfile(members_db.dbfile):
-            out += html['message'].format(content='No database file found. Create new user.')
-            out += html['setup']
-        else:
-            if loggedIn():
-                out += html['search']
-                out += html['add'].format(expire=members_db.end_of_year())
-            else:
-                out += html['login']
-        return html['template'].format(content=out)
-
-    @cherrypy.expose
-    def setup(self, user, password):
-        out = ''
-        if not os.path.isfile(members_db.dbfile):
+@app.route('/setup', methods=['GET', 'POST'])
+def setup():
+    if not os.path.isfile(members_db.dbfile):
+        if request.method == 'POST':
             members_db.new_db()
-            members_db.new_appuser(user, password)
-            out += html['message'].format(content='Setup complete.')
-            out += html['login']
+            members_db.new_appuser(request.form['appuser'], request.form['password'])
+            flash('New database created.')
+            return redirect(url_for('login'))
         else:
-            out += html['message'].format(content='Setup is already complete.')
-        return html['template'].format(content=out)
+            flash('Create the first user.')
+            return render_template('setup.html')
+    else:
+        flash('Database already exists.')
+        return redirect(url_for('index'))
 
-    @cherrypy.expose('new-user')
-    def new_user(self, appuser=None, password=None):
-        out = ''
-        if loggedIn():
-            if appuser and password:
-                members_db.new_appuser(appuser, password)
-                out += html['message'].format(content='User has been added.')
-            else:
-                out += html['new_user']
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        if members_db.password_valid(request.form['appuser'], request.form['password']):
+            session['appuser'] = request.form['appuser']
+            flash('You are now logged in.')
+            return redirect(url_for('index'))
         else:
-            out += html['message'].format(content='You must log in to add a user.')
-        return html['template'].format(content=out)
+            flash('Incorrect user name or password.')
+            return redirect(url_for('login'))
+    else:
+        return render_template('login.html')
 
-    @cherrypy.expose
-    def login(self, appuser=None, password=None):
-        out = ''
-        if appuser and password:
-            if members_db.password_valid(appuser, password):
-                cookie = cherrypy.response.cookie
-                cookie['auth'] = auth_keys.add(appuser)
-                out += html['message'].format(content='You are now logged in.')
-                out += html['search']
-            else:
-                out += html['message'].format(content='Incorrect username or password.')
+@app.route('/logout')
+def logout():
+    session.pop('appuser', None)
+    flash('You have been logged out.')
+    return redirect(url_for('login'))
+
+@app.route('/new-user', methods=['GET', 'POST'])
+@login_required
+def new_user():
+    if request.method == 'POST':
+        members_db.new_appuser(request.form['appuser'], request.form['password'])
+        flash('New user created.')
+        return redirect(url_for('index'))
+    else:
+        flash('Add a new user.')
+        return render_template('new_user.html')
+
+@app.route('/search')
+@login_required
+def search():
+    records = members_db.search(request.args.get('query'))
+    flash('{} records found.'.format(len(records)))
+    return render_template('records.html', records=records)
+
+@app.route('/add', methods=['GET', 'POST'])
+@login_required
+def add():
+    if request.method == 'POST':
+        mid = members_db.add(request.form.to_dict())
+        flash('Record added.')
+        return render_template('records.html', records=members_db.get(mid))
+    else:
+        return redirect(url_for('index'))
+
+@app.route('/edit', methods=['GET', 'POST'])
+@login_required
+def edit():
+    if request.method == 'POST':
+        mid = request.form['mid']
+        members_db.edit(record=request.form.to_dict())
+        flash('Record updated.')
+        return render_template('records.html', records=members_db.get(mid))
+    else:
+        mid = request.args.get('mid')
+        records = members_db.get(mid)
+        if records:
+            return render_template('edit.html', record=records[0])
         else:
-            out += html['login']
-        return html['template'].format(content=out)
+            flash('Record not found.')
+            return redirect(url_for('index'))
 
-    @cherrypy.expose
-    def logout(self):
-        out = ''
-        if loggedIn():
-            auth_keys.delete(cherrypy.request.cookie['auth'].value)
-            out += html['message'].format(content='You have been logged out.')
+@app.route('/delete', methods=['GET', 'POST'])
+@login_required
+def delete():
+    if request.method == 'POST':
+        mid = request.form['mid']
+        flash('Record deleted.')
+        out = render_template('records.html', records=members_db.get(mid))
+        members_db.remove(mid)
+        return out
+    else:
+        mid = request.args.get('mid')
+        records = members_db.get(mid)
+        if records:
+            flash('Are you sure you want to delete this record?')
+            return render_template('confirm_delete.html', records=records, mid=mid)
         else:
-            out += html['message'].format(content='You are not logged in.')
-        return html['template'].format(content=out)
+            flash('Record not found.')
+            return redirect(url_for('index'))
 
-    @cherrypy.expose
-    def search(self, query):
-        out = html['search']
-        records = members_db.search(query)
-        out += html['message'].format(content='{} records found.'.format(len(records)))
+@app.route('/all', defaults={'args': ''})
+@app.route('/all/<path:args>')
+@login_required
+def all(args):
+    args = args.split('/')
+
+    if 'expired' in args:
+        records = members_db.expired()
+    elif 'current' in args:
+        records = members_db.current()
+    else:
+        records = members_db.all()
+
+    flash('{} records found.'.format(len(records)))
+
+    if 'email' in args:
+        emails = ''
         for record in records:
-            out += html['record'].format(**record)
-        return html['template'].format(content=out)
-
-    @cherrypy.expose
-    def all(self, *args):
-        out = ''
-        if loggedIn():
-            out += html['search']
-            if 'expired' in args:
-                records = members_db.expired()
-            elif 'current' in args:
-                records = members_db.current()
-            else:
-                records = members_db.all()
-            out += html['message'].format(content='{} records found.'.format(len(records)))
-            if 'email' in args:
-                emails = ''
-                for record in records:
-                    emails += record['email'] + '\n'
-                out += html['text'].format(content=emails)
-            elif 'csv' in args:
-                csv_data = io.StringIO()
-                writer = csv.DictWriter(csv_data, fieldnames=members_db.get_fields())
-                writer.writeheader()
-                for record in records:
-                    del record['rowid']
-                    writer.writerow(record)
-                out += html['text'].format(content=csv_data.getvalue())
-            else:
-                for record in records:
-                    out += html['record'].format(**record)
-        else:
-            out += html['message'].format(content='You are not logged in.')
-            out += html['login']
-        return html['template'].format(content=out)
-
-    @cherrypy.expose
-    def add(self, **kwargs):
-        out = ''
-        if loggedIn():
-            if len(kwargs.keys()) > 0:
-                rowid = members_db.add(kwargs)
-                out += html['message'].format(content='Record added.')
-                out += html['record'].format(**members_db.get(rowid))
-            else:
-                out += html['add'].format(expire=members_db.end_of_year())
-        else:
-            out += html['message'].format(content='You must log in to add records.')
-        return html['template'].format(content=out)
-
-    @cherrypy.expose
-    def edit(self, rowid, **kwargs):
-        out = ''
-        if loggedIn():
-            if len(kwargs.keys()) > 0:
-                members_db.edit(rowid=rowid, record=kwargs)
-                out += html['message'].format(content='Record updated.')
-                out += html['record'].format(**members_db.get(rowid))
-            else:
-                out += html['edit'].format(**members_db.get(rowid))
-        else:
-            out += html['message'].format(content='You must log in to edit records.')
-        return html['template'].format(content=out)
-
-    @cherrypy.expose
-    def delete(self, rowid, confirm=False):
-        out = ''
-        if loggedIn():
-            if confirm == 'true':
-                out += html['record'].format(**members_db.get(rowid))
-                out += html['message'].format(content='Record has been deleted.')
-                members_db.remove(rowid)
-            else:
-                out += html['record'].format(**members_db.get(rowid))
-                out += html['message'].format(content='Are you sure you want to delete this record?')
-                out += html['confirm_delete'].format(rowid=rowid)
-        else:
-            out += html['message'].format(content='You must log in to delete records.')
-        return html['template'].format(content=out)
-
-    @cherrypy.expose('import')
-    def json_import(self, json_data=None):
-        out = ''
-        if loggedIn():
-            if json_data:
-                records = json.loads(json_data)
-                for record in records:
-                    members_db.add(record)
-                out += html['message'].format(content='Import complete.')
-            else:
-                out += html['import']
-        else:
-            out += html['message'].format(content='You must log in to import records.')
-        return html['template'].format(content=out)
-
-    @cherrypy.expose('export')
-    @cherrypy.tools.json_out()
-    def json_export(self):
-        if loggedIn():
-            return members_db.all()
-        else:
-            raise cherrypy.HTTPError(401)
-
-    @cherrypy.expose
-    def verify(self, rowid):
-        out = ''
-        if loggedIn():
-            record = members_db.get(rowid)
-            ama_url = 'http://www.modelaircraft.org/MembershipQuery.aspx'
-            ama_page = requests.get(ama_url)
-            soup = BeautifulSoup(ama_page.text)
-            viewstate = soup.find_all('input', attrs={'name':'__VIEWSTATE'})[0]['value']
-            eventvalidation = soup.find_all('input', attrs={'name':'__EVENTVALIDATION'})[0]['value']
-            out += html['message'].format(content='By clicking Verify you will be submitting the following name and AMA number on modelaircraft.org to verify membership.')
-            out += html['verify'].format(ama=record['ama'], last=record['last'], eventvalidation=eventvalidation, viewstate=viewstate)
-        else:
-            out += html['message'].format(content='You are not logged in.')
-        return html['template'].format(content=out)
-
-    @cherrypy.expose
-    def about(self):
-        version = subprocess.check_output(['git','rev-parse','--short','HEAD']).decode().strip()
-        out = html['about'].format(version=version)
-        return html['template'].format(content=out)
+            email = record['email']
+            if len(email) > 0:
+                emails += email + '\n'
+        return render_template('text.html', content=emails)
+    elif 'csv' in args:
+        csv_data = io.StringIO()
+        writer = csv.DictWriter(csv_data, fieldnames=members_db.get_fields())
+        writer.writeheader()
+        for record in records:
+            writer.writerow(record)
+        return render_template('text.html', content=csv_data.getvalue())
+    else:
+        return render_template('records.html', records=records)
 
 
-cherrypy.config.update('server.conf')
+@app.route('/export')
+@login_required
+def json_export():
+    return jsonify(members=members_db.all())
+
+@app.route('/import', methods=['GET', 'POST'])
+@login_required
+def json_import():
+    if request.method == 'POST':
+        json_data = request.form['json_data']
+        records = json.loads(json_data).get('members')
+        members_db.add_multiple(records)
+        flash('{} records imported.'.format(len(records)))
+        return redirect(url_for('index'))
+    else:
+        return render_template('import.html')
+
+@app.route('/verify')
+@login_required
+def verify():
+    record = members_db.get(request.args.get('mid'))[0]
+    ama_url = 'http://www.modelaircraft.org/MembershipQuery.aspx'
+    ama_page = requests.get(ama_url)
+    soup = BeautifulSoup(ama_page.text)
+    viewstate = soup.find_all('input', attrs={'name':'__VIEWSTATE'})[0]['value']
+    eventvalidation = soup.find_all('input', attrs={'name':'__EVENTVALIDATION'})[0]['value']
+    flash('By clicking Verify you will be submitting the following name and AMA number on modelaircraft.org to verify membership.')
+    return render_template('verify.html', record=record, eventvalidation=eventvalidation, viewstate=viewstate)
+
+@app.route('/about')
+def about():
+    version = subprocess.check_output(['git','rev-parse','--short','HEAD']).decode().strip()
+    return render_template('about.html', version=version)
 
 if __name__ == '__main__':
-    cherrypy.quickstart(Root(), '/', 'app.conf')
+    app.run()
