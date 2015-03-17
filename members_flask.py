@@ -94,9 +94,9 @@ def search():
 @login_required
 def add():
     if request.method == 'POST':
-        rowid = members_db.add(request.form.to_dict())
+        mid = members_db.add(request.form.to_dict())
         flash('Record added.')
-        return render_template('records.html', records=members_db.get(rowid))
+        return render_template('records.html', records=members_db.get(mid))
     else:
         return redirect(url_for('index'))
 
@@ -104,13 +104,13 @@ def add():
 @login_required
 def edit():
     if request.method == 'POST':
-        rowid = request.form['rowid']
-        members_db.edit(rowid=rowid, record=request.form.to_dict())
+        mid = request.form['mid']
+        members_db.edit(record=request.form.to_dict())
         flash('Record updated.')
-        return render_template('records.html', records=members_db.get(rowid))
+        return render_template('records.html', records=members_db.get(mid))
     else:
-        rowid = request.args.get('rowid')
-        records = members_db.get(rowid)
+        mid = request.args.get('mid')
+        records = members_db.get(mid)
         if records:
             return render_template('edit.html', record=records[0])
         else:
@@ -121,17 +121,17 @@ def edit():
 @login_required
 def delete():
     if request.method == 'POST':
-        rowid = request.form['rowid']
+        mid = request.form['mid']
         flash('Record deleted.')
-        out = render_template('records.html', records=members_db.get(rowid))
-        members_db.remove(rowid)
+        out = render_template('records.html', records=members_db.get(mid))
+        members_db.remove(mid)
         return out
     else:
-        rowid = request.args.get('rowid')
-        records = members_db.get(rowid)
+        mid = request.args.get('mid')
+        records = members_db.get(mid)
         if records:
             flash('Are you sure you want to delete this record?')
-            return render_template('confirm_delete.html', records=records, rowid=rowid)
+            return render_template('confirm_delete.html', records=records, mid=mid)
         else:
             flash('Record not found.')
             return redirect(url_for('index'))
@@ -163,7 +163,6 @@ def all(args):
         writer = csv.DictWriter(csv_data, fieldnames=members_db.get_fields())
         writer.writeheader()
         for record in records:
-            del record['rowid']
             writer.writerow(record)
         return render_template('text.html', content=csv_data.getvalue())
     else:
@@ -190,7 +189,7 @@ def json_import():
 @app.route('/verify')
 @login_required
 def verify():
-    record = members_db.get(request.args.get('rowid'))[0]
+    record = members_db.get(request.args.get('mid'))[0]
     ama_url = 'http://www.modelaircraft.org/MembershipQuery.aspx'
     ama_page = requests.get(ama_url)
     soup = BeautifulSoup(ama_page.text)
