@@ -31,10 +31,42 @@ will not be needed once everything is up and running.
 Next we will build the docker image.
 
     cd rc-club-members
-    sudo docker build .
+    sudo docker build -t "tortxof/rc-club-members" .
 
-This process may take a few minutes.
+This process may take a few minutes. Next, we can run an app container
 
-    sudo docker run -d --restart always --volumes-from members_data --name members_app -p 5000:5000
+    sudo docker run -d --restart always --volumes-from members_data --name members_app -p 5000:5000 tortxof/rc-club-members
+
+Now the app should be up and running. You can check with `docker ps`.
+
+    sudo docker ps
 
 ### Upstart
+
+### Nginx
+
+This is the setup I recommend for nginx. This is setup on the host machine, not
+in the docker container. You should of course change the domain names and SSL
+files. This will redirect any http requests to the https server. Copy the
+following to `/etc/nginx/sites-available/rc-club-members` and symlink to it from
+`/etc/nginx/sites-enabled/rc-club-members`.
+
+    server {
+      listen 80;
+      server_name members.example.com;
+      return 301 https://members.example.com$request_uri;
+    }
+
+    server {
+      listen 443;
+      ssl on;
+      server_name members.example.com;
+      ssl_certificate /etc/nginx/ssl/members.example.com.crt;
+      ssl_certificate_key /etc/nginx/ssl/members.example.com.key;
+
+      location / {
+        proxy_pass http://localhost:5000;
+        proxy_set_header Host      $host;
+        proxy_set_header X-Real-IP $remote_addr;
+      }
+    }
