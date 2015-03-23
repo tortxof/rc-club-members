@@ -13,15 +13,24 @@ from flask import Flask, session, render_template, flash, request, redirect, url
 
 import members_database
 
-members_db = members_database.MembersDatabase()
-
 app = Flask(__name__)
 
 if os.path.isfile('app.conf'):
     app.config.from_pyfile('app.conf')
+elif os.environ.get('USE_DOCKER_CONFIG') == 'TRUE':
+    subprocess.call(['cp', 'app.conf.docker', 'app.conf'])
+    subprocess.call(['chmod', '600', 'app.conf'])
+    with open('app.conf', 'a') as f:
+        print('SECRET_KEY =', os.urandom(32), file=f)
+    app.config.from_pyfile('app.conf')
 else:
     app.debug = True
     app.secret_key = os.urandom(32)
+
+if not app.config.get('DB_FILE'):
+    app.config['DB_FILE'] = 'members.db'
+
+members_db = members_database.MembersDatabase(app.config['DB_FILE'])
 
 def login_required(f):
     @wraps(f)

@@ -1,12 +1,12 @@
 import os
 import sqlite3
 
-import bcrypt
+from werkzeug.security import generate_password_hash, check_password_hash
 
 class MembersDatabase(object):
-    def __init__(self):
+    def __init__(self, dbfile):
         self.sort_sql = ' order by expire desc, last asc, first asc'
-        self.dbfile = 'members.db'
+        self.dbfile = dbfile
 
     def db_conn(self):
         conn = sqlite3.connect(self.dbfile)
@@ -55,17 +55,17 @@ class MembersDatabase(object):
         conn.close()
 
     def new_appuser(self, appuser, password):
-        password = bcrypt.hashpw(password.encode(), bcrypt.gensalt())
+        password_hash = generate_password_hash(password, method='pbkdf2:sha256')
         conn = self.db_conn()
-        conn.execute('insert into appusers values(?, ?)', (appuser, password))
+        conn.execute('insert into appusers values(?, ?)', (appuser, password_hash))
         conn.commit()
         conn.close()
 
     def password_valid(self, appuser, password):
         conn = self.db_conn()
-        pw_hash = conn.execute('select password from appusers where appuser=?', (appuser,)).fetchone()[0]
+        password_hash = conn.execute('select password from appusers where appuser=?', (appuser,)).fetchone()[0]
         conn.close()
-        return bcrypt.hashpw(password.encode(), pw_hash) == pw_hash
+        return check_password_hash(password_hash, password)
 
     def add(self, record):
         record['mid'] = self.mk_id()
