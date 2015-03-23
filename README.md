@@ -33,7 +33,9 @@ Next we will build the docker image.
     cd rc-club-members
     sudo docker build -t "tortxof/rc-club-members" .
 
-This process may take a few minutes. Next, we can run an app container
+This process may take a few minutes. Next, we can run an app container. To use a
+port other than 5000, change the first number in the `-p` option. For example,
+to use port 80, `-p 80:5000`.
 
     sudo docker run -d --restart always --volumes-from members_data --name members_app -p 5000:5000 tortxof/rc-club-members
 
@@ -42,6 +44,8 @@ Now the app should be up and running. You can check with `docker ps`.
     sudo docker ps
 
 ### Upstart
+
+More info coming soon.
 
 ### Nginx
 
