@@ -70,3 +70,17 @@ following to `/etc/nginx/sites-available/rc-club-members` and symlink to it from
         proxy_set_header X-Real-IP $remote_addr;
       }
     }
+
+### Setup Database
+
+Once the app is up and running, go to `/setup` in your browser to create the
+first user. As long as the database file does not exist, the app will let you
+create a user.
+
+### Upgrading
+
+To upgrade, we will use docker exec to run the upgrade script, then restart the
+container.
+
+    sudo docker exec members_app ./upgrade.sh
+    sudo docker restart members_app
