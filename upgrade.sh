@@ -1,6 +1,6 @@
 #! /bin/bash
 
-apt-get update && apt-get dist-upgrade
+apt-get update && apt-get -y dist-upgrade
 
 git checkout master
 git pull
