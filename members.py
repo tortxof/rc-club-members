@@ -237,7 +237,9 @@ def ro_auth(slug):
 
 @app.route('/about')
 def about():
-    version = subprocess.check_output(['git','rev-parse','--short','HEAD']).decode().strip()
+    with open('.git/refs/heads/master') as f:
+        version = f.read()
+    version = version.strip()[:8]
     return render_template('about.html', version=version)
 
 if __name__ == '__main__':
