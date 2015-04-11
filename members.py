@@ -217,7 +217,7 @@ def get_ro_token():
     data['time'] = int(time.time())
     data['readonly'] = 'OK'
     slug = s.dumps(data)
-    return render_template('text.html', content=slug)
+    return render_template('get_ro_token.html', slug=slug)
 
 @app.route('/ro/<slug>')
 def ro_auth(slug):
