@@ -6,10 +6,12 @@ import subprocess
 import io
 import csv
 import json
+import time
 
 import requests
 from bs4 import BeautifulSoup
 from flask import Flask, session, render_template, flash, request, redirect, url_for, jsonify
+from itsdangerous import URLSafeSerializer
 
 import members_database
 
@@ -35,7 +37,7 @@ members_db = members_database.MembersDatabase(app.config['DB_FILE'])
 def login_required(f):
     @wraps(f)
     def wrapper(*args, **kwargs):
-        if 'appuser' in session:
+        if ('appuser' in session) or (('readonly' in session) and (request.method == 'GET')):
             return f(*args, **kwargs)
         else:
             flash('You are not logged in.')
@@ -206,6 +208,32 @@ def verify():
     eventvalidation = soup.find_all('input', attrs={'name':'__EVENTVALIDATION'})[0]['value']
     flash('By clicking Verify you will be submitting the following name and AMA number on modelaircraft.org to verify membership.')
     return render_template('verify.html', record=record, eventvalidation=eventvalidation, viewstate=viewstate)
+
+@app.route('/get-ro-token')
+@login_required
+def get_ro_token():
+    s = URLSafeSerializer(app.config.get('SECRET_KEY'))
+    data = {}
+    data['time'] = int(time.time())
+    data['readonly'] = 'OK'
+    slug = s.dumps(data)
+    return render_template('text.html', content=slug)
+
+@app.route('/ro/<slug>')
+def ro_auth(slug):
+    s = URLSafeSerializer(app.config.get('SECRET_KEY'))
+    try:
+        data = s.loads(slug)
+    except:
+        flash('Authorization failed.')
+        return redirect(url_for('index'))
+    if data.get('readonly') == 'OK' and data.get('time') + 3628800 >= int(time.time()):
+        session['readonly'] = 'OK'
+        flash('You have read only access.')
+        return redirect(url_for('index'))
+    else:
+        flash('Authorization failed.')
+        return redirect(url_for('index'))
 
 @app.route('/about')
 def about():

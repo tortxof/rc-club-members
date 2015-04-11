@@ -64,6 +64,7 @@
               <li><a href="/export">Export</a></li>
               <li class="divider"></li>
               {% if session['appuser'] %}
+              <li><a href="/get-ro-token">Get read only token</a></li>
               <li><a href="/logout">Log Out {{ session['appuser'] }}</a></li>
               <li class="divider"></li>
               {% endif %}
