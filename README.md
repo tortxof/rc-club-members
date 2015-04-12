@@ -82,8 +82,7 @@ create a user.
 
 ### Upgrading
 
-To upgrade, we will use docker exec to run the upgrade script, then restart the
-container.
+To upgrade, pull in changes to the git repo, and restart the container.
 
-    sudo docker exec members_app ./upgrade.sh
+    git pull
     sudo docker restart members_app
