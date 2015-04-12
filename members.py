@@ -235,12 +235,15 @@ def verify():
 @app.route('/get-ro-token')
 @login_required
 def get_ro_token():
-    s = URLSafeSerializer(app.config.get('SECRET_KEY'))
-    data = {}
-    data['time'] = int(time.time())
-    data['readonly'] = 'OK'
-    slug = s.dumps(data)
-    return render_template('get_ro_token.html', slug=slug)
+    if 'appuser' in session:
+        s = URLSafeSerializer(app.config.get('SECRET_KEY'))
+        data = {}
+        data['time'] = int(time.time())
+        data['readonly'] = 'OK'
+        slug = s.dumps(data)
+        return render_template('get_ro_token.html', slug=slug)
+    else:
+        return redirect(url_for('index'))
 
 @app.route('/ro/<slug>')
 def ro_auth(slug):
