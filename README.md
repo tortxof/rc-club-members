@@ -23,8 +23,7 @@ This container will not run any processes. It's only for holding our database
 file. We will connect it to our app container later using the `--volumes-from`
 command line option.
 
-Now let's clone the git repository. This can be done in the home directory. It
-will not be needed once everything is up and running.
+Now let's clone the git repository. This directory will be bound to the app container.
 
     git clone https://github.com/tortxof/rc-club-members.git
 
@@ -37,7 +36,7 @@ This process may take a few minutes. Next, we can run an app container. To use a
 port other than 5000, change the first number in the `-p` option. For example,
 to use port 80, `-p 80:5000`.
 
-    sudo docker run -d --restart always --volumes-from members_data --name members_app -p 5000:5000 tortxof/rc-club-members
+    sudo docker run -d --restart always --volumes-from members_data -v $(pwd):/app --name members_app -p 5000:5000 tortxof/rc-club-members
 
 Now the app should be up and running. You can check with `docker ps`.
 
