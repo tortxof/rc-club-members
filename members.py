@@ -162,14 +162,13 @@ def all(args):
     else:
         records = members_db.all()
 
-    flash('{} records found.'.format(len(records)))
-
     if 'email' in args:
         emails = ''
         for record in records:
             email = record['email']
             if len(email) > 0:
                 emails += email + '\n'
+        flash('{} records found.'.format(len(records)))
         return render_template('text.html', content=emails)
     elif 'csv' in args:
         csv_data = io.StringIO()
@@ -177,6 +176,7 @@ def all(args):
         writer.writeheader()
         for record in records:
             writer.writerow(record)
+        flash('{} records found.'.format(len(records)))
         return render_template('text.html', content=csv_data.getvalue())
     elif 'xlsx' in args:
         col_names = [('first', 'First'), ('last', 'Last'), ('ama', 'AMA'),
@@ -199,6 +199,7 @@ def all(args):
         xlsx_data.seek(0)
         return send_file(xlsx_data, as_attachment=True, attachment_filename='bsrcc-roster-{}.xlsx'.format(datetime.date.today().isoformat()))
     else:
+        flash('{} records found.'.format(len(records)))
         return render_template('records.html', records=records)
 
 
