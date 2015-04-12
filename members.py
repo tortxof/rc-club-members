@@ -7,10 +7,12 @@ import io
 import csv
 import json
 import time
+import datetime
 
 import requests
 from bs4 import BeautifulSoup
-from flask import Flask, session, render_template, flash, request, redirect, url_for, jsonify
+import xlsxwriter
+from flask import Flask, session, render_template, flash, request, redirect, url_for, jsonify, send_file
 from itsdangerous import URLSafeSerializer
 
 import members_database
@@ -176,6 +178,26 @@ def all(args):
         for record in records:
             writer.writerow(record)
         return render_template('text.html', content=csv_data.getvalue())
+    elif 'xlsx' in args:
+        col_names = [('first', 'First'), ('last', 'Last'), ('ama', 'AMA'),
+        ('phone', 'Phone'), ('address', 'Address'), ('city', 'City'),
+        ('state', 'State'), ('zip', 'ZIP'), ('email', 'E-mail'),
+        ('expire', 'Expiration')]
+        xlsx_data = io.BytesIO()
+        workbook = xlsxwriter.Workbook(xlsx_data)
+        worksheet = workbook.add_worksheet('Members')
+        worksheet.set_landscape()
+        header = workbook.add_format({'bold': True, 'bottom': True})
+        for col, name in enumerate(col_names):
+            worksheet.write(0, col, name[1], header)
+        for row, record in enumerate(records, start=1):
+            for col, field in enumerate(col_names):
+                worksheet.write(row, col, record.get(field[0]))
+        worksheet.print_area(0, 0, len(records), len(col_names)-1)
+        worksheet.fit_to_pages(1, 1)
+        workbook.close()
+        xlsx_data.seek(0)
+        return send_file(xlsx_data, as_attachment=True, attachment_filename='bsrcc-roster-{}.xlsx'.format(datetime.date.today().isoformat()))
     else:
         return render_template('records.html', records=records)
 
