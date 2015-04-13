@@ -13,11 +13,13 @@ import requests
 from bs4 import BeautifulSoup
 import xlsxwriter
 from flask import Flask, session, render_template, flash, request, redirect, url_for, jsonify, send_file
+from werkzeug.contrib.fixers import ProxyFix
 from itsdangerous import URLSafeSerializer
 
 import members_database
 
 app = Flask(__name__)
+app.wsgi_app = ProxyFix(app.wsgi_app)
 
 if os.path.isfile('app.conf'):
     app.config.from_pyfile('app.conf')
