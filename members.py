@@ -193,7 +193,9 @@ def all(args):
         for row, record in enumerate(records, start=1):
             for col, field in enumerate(col_names):
                 worksheet.write(row, col, record.get(field[0]))
-        worksheet.print_area(0, 0, len(records), len(col_names)-1)
+        worksheet.merge_range(len(records)+2, 0, len(records)+2, len(col_names)-1, '{} members'.format(len(records)))
+        worksheet.merge_range(len(records)+3, 0, len(records)+3, len(col_names)-1, 'Generated: {}'.format(datetime.date.today().isoformat()))
+        worksheet.print_area(0, 0, len(records)+3, len(col_names)-1)
         worksheet.fit_to_pages(1, 1)
         workbook.close()
         xlsx_data.seek(0)
