@@ -1,15 +1,13 @@
-FROM ubuntu:trusty
+FROM python:3.4
 MAINTAINER Daniel Jones <tortxof@gmail.com>
+
+RUN mkdir /app
+WORKDIR /app
+COPY . /app
+RUN pip install -r requirements.txt
 
 ENV USE_DOCKER_CONFIG TRUE
 
-RUN apt-get install -y python3-setuptools sqlite3
-RUN easy_install3 pip
-COPY requirements.txt /app/
-RUN pip3 install -r /app/requirements.txt
-
-WORKDIR /app
-
 EXPOSE 5000
 
-CMD ["python3", "members.py"]
+CMD ["python3", "./members.py"]
