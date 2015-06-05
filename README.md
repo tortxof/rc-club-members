@@ -67,7 +67,7 @@ Once the app is up and running, go to `/setup` in your browser to create the
 first user. As long as the database file does not exist, the app will let you
 create a user.
 
-### Upgrading
+## Upgrading
 
 To upgrade, pull a new image from Docker Hub, remove the old container, and run
 a new one.
@@ -77,10 +77,19 @@ a new one.
     docker rm members-app
     docker run -d --restart always --volumes-from members-data --name members-app -p 5000:5000 tortxof/rc-club-members
 
-### Build Your Own image
+## Build Your Own image
 
 If you don't want to pull the image from Docker Hub, you can build it yourself.
 
     git clone https://github.com/tortxof/rc-club-members.git
     cd rc-club-members
     docker build -t rc-club-members .
+
+## Run In Development Mode
+
+With Flask in debug mode, it will auto restart when changes are detected.
+To start a container in debug mode, run this command from the root of the git repo.
+
+    docker run -d --name members-app --volumes-from members-data -e FLASK_DEBUG=true -p 8080:5000 -v $(pwd):/app tortxof/rc-club-members
+
+This will mount the git repo from the host to `/app` in the container, overriding the containers built in app.
