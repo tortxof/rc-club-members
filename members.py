@@ -19,22 +19,16 @@ import members_database
 
 app = Flask(__name__)
 
-if os.path.isfile('app.conf'):
-    app.config.from_pyfile('app.conf')
-elif os.environ.get('USE_DOCKER_CONFIG') == 'TRUE':
-    subprocess.call(['cp', 'app.conf.docker', 'app.conf'])
-    subprocess.call(['chmod', '600', 'app.conf'])
-    with open('app.conf', 'a') as f:
-        print('SECRET_KEY =', os.urandom(32), file=f)
-    app.config.from_pyfile('app.conf')
-else:
-    app.debug = True
-    app.secret_key = os.urandom(32)
+if not os.path.isfile('/members-data/key'):
+    with open('/members-data/key', 'wb') as f:
+        f.write(os.urandom(32))
 
-if not app.config.get('DB_FILE'):
-    app.config['DB_FILE'] = 'members.db'
+with open('/members-data/key', 'rb') as f:
+    app.config['SECRET_KEY'] = f.read()
 
-members_db = members_database.MembersDatabase(app.config['DB_FILE'])
+app.config['DEBUG'] = os.environ.get('FLASK_DEBUG', 'false').lower() == 'true'
+
+members_db = members_database.MembersDatabase('/members-data/members.db')
 
 def login_required(f):
     @wraps(f)
@@ -271,4 +265,4 @@ def about():
     return render_template('about.html', version=version)
 
 if __name__ == '__main__':
-    app.run(host=app.config.get('HOST'), port=app.config.get('PORT'))
+    app.run(host='0.0.0.0')
