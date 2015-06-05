@@ -1,15 +1,11 @@
-rc-club-members
-===============
+# rc-club-members
 
-A flask app for managing members of an RC club.
------------------------------------------------
+## A flask app for managing members of an RC club.
 
-Installation
-------------
+## Installation
 
-You can deploy this app with [Docker](https://www.docker.com/) or
-[upstart](http://upstart.ubuntu.com/)/[virtualenv](https://virtualenv.pypa.io/).
-Either way, you should setup a reverse proxy with nginx.
+You can deploy this app with [Docker](https://www.docker.com/).
+It's a good idea to use nginx as a reverse proxy and https server.
 
 ### Docker
 
@@ -17,34 +13,25 @@ First we need a
 [data container](https://docs.docker.com/userguide/dockervolumes/#creating-and-mounting-a-data-volume-container)
 to keep the database file.
 
-    sudo docker create -v /members-data --name members_data ubuntu:trusty
+    docker create -v /members-data --name members-data python:3.4
 
 This container will not run any processes. It's only for holding our database
 file. We will connect it to our app container later using the `--volumes-from`
 command line option.
 
-Now let's clone the git repository. This directory will be bound to the app container.
+Now let's pull the image from [Docker Hub](https://registry.hub.docker.com/u/tortxof/rc-club-members/).
 
-    git clone https://github.com/tortxof/rc-club-members.git
+    docker pull tortxof/rc-club-members
 
-Next we will build the docker image.
-
-    cd rc-club-members
-    sudo docker build -t "tortxof/rc-club-members" .
-
-This process may take a few minutes. Next, we can run an app container. To use a
+Once the image is pulled, we can run the app container. To use a
 port other than 5000, change the first number in the `-p` option. For example,
 to use port 80, `-p 80:5000`.
 
-    sudo docker run -d --restart always --volumes-from members_data -v $(pwd):/app --name members_app -p 5000:5000 tortxof/rc-club-members
+    docker run -d --restart always --volumes-from members-data --name members-app -p 5000:5000 tortxof/rc-club-members
 
 Now the app should be up and running. You can check with `docker ps`.
 
-    sudo docker ps
-
-### Upstart
-
-More info coming soon.
+    docker ps
 
 ### Nginx
 
@@ -82,7 +69,18 @@ create a user.
 
 ### Upgrading
 
-To upgrade, pull in changes to the git repo, and restart the container.
+To upgrade, pull a new image from Docker Hub, remove the old container, and run
+a new one.
 
-    git pull
-    sudo docker restart members_app
+    docker pull tortxof/rc-club-members
+    docker stop members-app
+    docker rm members-app
+    docker run -d --restart always --volumes-from members-data --name members-app -p 5000:5000 tortxof/rc-club-members
+
+### Build Your Own image
+
+If you don't want to pull the image from Docker Hub, you can build it yourself.
+
+    git clone https://github.com/tortxof/rc-club-members.git
+    cd rc-club-members
+    docker build -t rc-club-members .
