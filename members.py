@@ -2,7 +2,7 @@
 
 from functools import wraps
 import os
-import subprocess
+import stat
 import io
 import csv
 import json
@@ -22,6 +22,7 @@ app = Flask(__name__)
 if not os.path.isfile('/members-data/key'):
     with open('/members-data/key', 'wb') as f:
         f.write(os.urandom(32))
+    os.chmod('/members-data/key', stat.S_IREAD)
 
 with open('/members-data/key', 'rb') as f:
     app.config['SECRET_KEY'] = f.read()
