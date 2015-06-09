@@ -16,4 +16,4 @@ VOLUME ["/members-data"]
 
 EXPOSE 5000
 
-ENTRYPOINT ["python3", "./members.py"]
+CMD ["uwsgi", "--yaml", "uwsgi.yaml"]
