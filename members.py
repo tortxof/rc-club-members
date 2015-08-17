@@ -236,7 +236,7 @@ def get_ro_token():
         s = URLSafeSerializer(app.config.get('SECRET_KEY'))
         data = {}
         data['time'] = int(time.time())
-        data['readonly'] = 'OK'
+        data['readonly'] = True
         slug = s.dumps(data)
         return render_template('get_ro_token.html', slug=slug)
     else:
@@ -251,7 +251,7 @@ def ro_auth(slug):
         flash('Authorization failed.')
         return redirect(url_for('index'))
     # 7257600 is 12 weeks in seconds.
-    if data.get('readonly') == 'OK' and data.get('time') + 7257600 >= int(time.time()):
+    if (data.get('readonly') == 'OK' or data.get('readonly')) and data.get('time') + 7257600 >= int(time.time()):
         session['readonly'] = 'OK'
         flash('You have read only access.')
         return render_template('ro_authorized.html')
