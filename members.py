@@ -250,7 +250,8 @@ def ro_auth(slug):
     except:
         flash('Authorization failed.')
         return redirect(url_for('index'))
-    if data.get('readonly') == 'OK' and data.get('time') + 3628800 >= int(time.time()):
+    # 7257600 is 12 weeks in seconds.
+    if data.get('readonly') == 'OK' and data.get('time') + 7257600 >= int(time.time()):
         session['readonly'] = 'OK'
         flash('You have read only access.')
         return render_template('ro_authorized.html')
