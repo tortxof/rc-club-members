@@ -25,6 +25,17 @@ to keep the database and key files.
 
 See below for upgrading if you already have a data container.
 
+### Mailgun
+
+To be able to send email, you must provide a `/members-data/mailgun.json` file
+with your mailgun `domain` and API `key`. Don't forget to set ownership and
+permissions the same as `/members-data/key`.
+
+    {
+      "domain": "example.com",
+      "key": "key-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+    }
+
 ### Nginx
 
 This is the setup I recommend for nginx. This is setup on the host machine, not
