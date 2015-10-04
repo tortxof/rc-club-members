@@ -1,0 +1,15 @@
+{% extends 'layout.html' %}
+{% block body %}
+<form class="" action="/send" method="post">
+  <div class="form-group">
+    <label for="subject">Subject</label>
+    <input id="subject" class="form-control" type="text" name="subject" value="BSRCC {{ month }} Newsletter" autofocus>
+  </div>
+  <div class="form-group">
+    <label for="body">Body (markdown)</label>
+    <textarea id="body" class="form-control" name="body" rows="24" cols="40">{% include 'email_default_body.md' %}</textarea>
+  </div>
+  <button class="btn btn-default" type="submit" name="send-current">Send to Current Members</button>
+  <button class="btn btn-default" type="submit" name="preview">Preview</button>
+</form>
+{% endblock %}

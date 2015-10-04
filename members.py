@@ -12,8 +12,9 @@ import datetime
 import requests
 from bs4 import BeautifulSoup
 import xlsxwriter
-from flask import Flask, session, render_template, flash, request, redirect, url_for, jsonify, send_file
+from flask import Flask, Markup, session, render_template, flash, request, redirect, url_for, jsonify, send_file
 from itsdangerous import URLSafeSerializer
+import misaka
 
 import members_database
 
@@ -26,6 +27,10 @@ if not os.path.isfile('/members-data/key'):
 
 with open('/members-data/key', 'rb') as f:
     app.config['SECRET_KEY'] = f.read()
+
+if os.path.isfile('/members-data/mailgun.json'):
+    with open('/members-data/mailgun.json') as f:
+        app.config['mailgun'] = json.load(f)
 
 app.config['DEBUG'] = os.environ.get('FLASK_DEBUG', 'false').lower() == 'true'
 
@@ -228,6 +233,32 @@ def verify():
     eventvalidation = soup.find_all('input', attrs={'name':'__EVENTVALIDATION'})[0]['value']
     flash('By clicking Verify you will be submitting the following name and AMA number on modelaircraft.org to verify membership.')
     return render_template('verify.html', record=record, eventvalidation=eventvalidation, viewstate=viewstate)
+
+@app.route('/send', methods=['GET', 'POST'])
+@login_required
+def send_email():
+    if request.method == 'POST':
+        if 'preview' in request.form:
+            return render_template('email_preview.html', body=Markup(misaka.html(request.form.get('body').replace('%recipient.name%', 'John Doe'))))
+        recipient_variables = {}
+        for member in members_db.current():
+            if member.get('email'):
+                recipient_variables[member.get('email')] = {}
+                recipient_variables[member.get('email')]['name'] = '{} {}'.format(member.get('first'), member.get('last'))
+                recipient_variables[member.get('email')]['id'] = member.get('mid')
+        email_data = {'from': 'BSRCC Newsletter <newsletter@bsrcc.com>',
+            'to': [email for email in recipient_variables.keys()],
+            'subject': request.form.get('subject'),
+            'text': request.form.get('body'),
+            'html': render_template('email_layout.html', body=Markup(misaka.html(request.form.get('body'))), subject=request.form.get('subject')),
+            'recipient-variables': json.dumps(recipient_variables)}
+        mailgun_response = requests.post('https://api.mailgun.net/v3/{}/messages'.format(app.config.get('mailgun')['domain']),
+            auth = ('api', app.config.get('mailgun')['key']),
+            data = email_data)
+        flash('Response from mailgun: {}'.format(mailgun_response.text))
+        return redirect(url_for('index'))
+    else:
+        return render_template('send_email.html', month=datetime.date.today().strftime('%B'))
 
 @app.route('/get-ro-token')
 @login_required
