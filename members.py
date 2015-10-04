@@ -159,6 +159,8 @@ def all(args):
         records = members_db.expired()
     elif 'current' in args:
         records = members_db.current()
+    elif 'previous' in args:
+        records = members_db.previous()
     else:
         records = members_db.all()
 
@@ -240,8 +242,15 @@ def send_email():
     if request.method == 'POST':
         if 'preview' in request.form:
             return render_template('email_preview.html', body=Markup(misaka.html(request.form.get('body').replace('%recipient.name%', 'John Doe'))))
+        if 'send-current' in request.form:
+            members = members_db.current()
+        elif 'send-previous' in request.form:
+            members = members_db.previous()
+        else:
+            flash('Missing form field. Please report this error.')
+            return redirect(url_for('index'))
         recipient_variables = {}
-        for member in members_db.current():
+        for member in members:
             if member.get('email'):
                 recipient_variables[member.get('email')] = {}
                 recipient_variables[member.get('email')]['name'] = '{} {}'.format(member.get('first'), member.get('last'))

@@ -134,6 +134,12 @@ class MembersDatabase(object):
         conn.close()
         return [dict(record) for record in records]
 
+    def previous(self):
+        conn = self.db_conn()
+        records = conn.execute('select * from members where expire>=date("now","start of year","-1 day")' + self.sort_sql).fetchall()
+        conn.close()
+        return [dict(record) for record in records]
+
     def end_of_year(self):
         conn = sqlite3.connect(':memory:')
         out = conn.execute('select date("now","+1 year","start of year","-1 day")').fetchone()[0]
