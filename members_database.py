@@ -63,9 +63,11 @@ class MembersDatabase(object):
 
     def password_valid(self, appuser, password):
         conn = self.db_conn()
-        password_hash = conn.execute('select password from appusers where appuser=?', (appuser,)).fetchone()[0]
+        password_hash = conn.execute('select password from appusers where appuser=?', (appuser,)).fetchone()
         conn.close()
-        return check_password_hash(password_hash, password)
+        if not password_hash:
+            return False
+        return check_password_hash(password_hash[0], password)
 
     def add(self, record):
         record['mid'] = self.mk_id()
