@@ -2,11 +2,8 @@
 
 The {{ month }} newsletter is here.
 
-Online:  
-<>
+[Online]()
 
-PDF:  
-<>
+[PDF]()
 
-Roster:  
-<>
+[Roster]()

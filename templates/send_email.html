@@ -7,10 +7,30 @@
   </div>
   <div class="form-group">
     <label for="body">Body (markdown)</label>
-    <textarea id="body" class="form-control" name="body" rows="24" cols="40">{% include 'email_default_body.md' %}</textarea>
+    <textarea id="body" class="form-control" name="body" rows="18" cols="40">{% include 'email_default_body.md' %}</textarea>
   </div>
-  <button class="btn btn-default" type="submit" name="send-current">Send to Current Members</button>
-  <button class="btn btn-default" type="submit" name="send-previous">Send to Previous Year Members</button>
-  <button class="btn btn-default" type="submit" name="preview">Preview</button>
+  <div class="form-group">
+    <button class="btn btn-default" type="submit" name="send-current">Send to Current Members</button>
+    <button class="btn btn-default" type="submit" name="send-previous">Send to Previous Year Members</button>
+    <button class="btn btn-default" type="submit" name="preview">Preview</button>
+  </div>
+  <div class="panel panel-default form-inline">
+    <div class="panel-heading">Test Email</div>
+    <div class="panel-body">
+      <div class="form-group">
+        <label for="test-first">First</label>
+        <input id="test-first" class="form-control" type="text" name="test-first">
+      </div>
+      <div class="form-group">
+        <label for="test-last">Last</label>
+        <input id="test-last" class="form-control" type="text" name="test-last">
+      </div>
+      <div class="form-group">
+        <label for="test-email">Email</label>
+        <input id="test-email" class="form-control" type="text" name="test-email">
+      </div>
+      <button class="btn btn-default" type="submit" name="send-test">Send Test Email</button>
+    </div>
+  </div>
 </form>
 {% endblock %}

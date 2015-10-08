@@ -246,6 +246,10 @@ def send_email():
             members = members_db.current()
         elif 'send-previous' in request.form:
             members = members_db.previous()
+        elif 'send-test' in request.form:
+            members = [{'first': request.form.get('test-first'),
+                        'last': request.form.get('test-last'),
+                        'email': request.form.get('test-email')}]
         else:
             flash('Missing form field. Please report this error.')
             return redirect(url_for('index'))
