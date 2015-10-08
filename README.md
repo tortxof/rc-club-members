@@ -90,11 +90,11 @@ If you don't want to pull the image from Docker Hub, you can build it yourself.
 
 With Flask in debug mode, it will auto restart when changes are detected.
 The `FLASK_DEBUG` environment variable puts Flask in debug mode.
-The `UWSGI_HTTP` environment variable tells the uwsgi server to spawn an HTTP
-server. To start a container in debug mode, run this command from the root of
-the git repo.
+The `python members.py` command at the end overrides the default uwsgi command.
+To start a container in debug mode, run this command from the root of the git
+repo.
 
-    docker run -d --name members-app --volumes-from members-data -e FLASK_DEBUG=true -e UWSGI_HTTP=0.0.0.0:4000 -p 8080:4000 -v $(pwd):/app tortxof/rc-club-members
+    docker run -d --name members-app --volumes-from members-data -e FLASK_DEBUG=true -p 8000:5000 -v $(pwd):/app tortxof/rc-club-members python members.py
 
 This will mount the git repo from the host to `/app` in the container,
 overriding the containers built in app.
