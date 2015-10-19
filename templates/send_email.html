@@ -7,8 +7,8 @@
   </div>
   <div class="form-group">
     <label for="from-email">From Email</label>
-    <input class="form-control" id="from-email" type="text" name="from-email" value="newsletter">
-    <span class="input-group-addon">@{{ domain }}</span>
+    <input class="form-control" id="from-email" type="text" name="from-email" value="newsletter" aria-describedby="domain">
+    <span class="input-group-addon" id="domain">@{{ domain }}</span>
   </div>
   <div class="form-group">
     <label for="subject">Subject</label>
