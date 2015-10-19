@@ -259,7 +259,7 @@ def send_email():
                 recipient_variables[member.get('email')] = {}
                 recipient_variables[member.get('email')]['name'] = '{} {}'.format(member.get('first'), member.get('last'))
                 recipient_variables[member.get('email')]['id'] = member.get('mid')
-        email_data = {'from': 'BSRCC Newsletter <newsletter@bsrcc.com>',
+        email_data = {'from': '{} <{}@{}>'.format(request.form.get('from-name'), request.form.get('from-email'), app.config.get('mailgun')['domain']),
             'to': [email for email in recipient_variables.keys()],
             'subject': request.form.get('subject'),
             'text': request.form.get('body'),
@@ -271,7 +271,7 @@ def send_email():
         flash('Response from mailgun: {}'.format(mailgun_response.text))
         return redirect(url_for('index'))
     else:
-        return render_template('send_email.html', month=datetime.date.today().strftime('%B'))
+        return render_template('send_email.html', month=datetime.date.today().strftime('%B'), domain=app.config.get('mailgun', {}).get('domain'))
 
 @app.route('/get-ro-token')
 @login_required
