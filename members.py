@@ -81,7 +81,8 @@ def login():
 
 @app.route('/logout')
 def logout():
-    session.pop('appuser', None)
+    for i in tuple(session.keys()):
+        session.pop(i, None)
     flash('You have been logged out.')
     return redirect(url_for('login'))
 
@@ -296,7 +297,7 @@ def ro_auth(slug):
         return redirect(url_for('index'))
     # 7257600 is 12 weeks in seconds.
     if (data.get('readonly') == 'OK' or data.get('readonly')) and data.get('time') + 7257600 >= int(time.time()):
-        session['readonly'] = 'OK'
+        session['readonly'] = True
         flash('You have read only access.')
         return render_template('ro_authorized.html')
     else:
