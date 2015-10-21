@@ -1,0 +1,21 @@
+{% extends 'layout.html' %}
+{% block body %}
+<div class="panel panel-default">
+  <div class="panel-heading">Send to {{ num_recipients }} recipients:</div>
+  <div class="panel-body">
+    {% for email in email_data.to %}
+    <code>{{ email }}</code>
+    {% endfor %}
+  </div>
+</div>
+
+<div class="panel panel-default">
+  <div class="panel-heading">From: {{ email_data.from }}<br>Subject: {{ email_data.subject }}</div>
+  <div class="panel-body">{{ email_body }}</div>
+</div>
+
+<form action="/send" method="post">
+  <input type="hidden" name="email_data" value="{{ email_data_json }}">
+  <button class="btn btn-default" type="submit" name="confirm-send">Send</button>
+</form>
+{% endblock %}

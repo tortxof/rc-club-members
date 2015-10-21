@@ -241,8 +241,18 @@ def verify():
 @login_required
 def send_email():
     if request.method == 'POST':
-        if 'preview' in request.form:
-            return render_template('email_preview.html', body=Markup(misaka.html(request.form.get('body').replace('%recipient.name%', 'John Doe'))))
+        if 'confirm-send' in request.form:
+            s = URLSafeSerializer(app.config.get('SECRET_KEY'))
+            try:
+                email_data = s.loads(request.form.get('email_data'))
+            except:
+                flash('Error decoding email data.')
+                return redirect(url_for('send_email'))
+            mailgun_response = requests.post('https://api.mailgun.net/v3/{}/messages'.format(app.config.get('mailgun')['domain']),
+                auth = ('api', app.config.get('mailgun')['key']),
+                data = email_data)
+            flash('Response from mailgun: {}'.format(mailgun_response.text))
+            return redirect(url_for('index'))
         if 'send-current' in request.form:
             members = members_db.current()
         elif 'send-previous' in request.form:
@@ -266,11 +276,12 @@ def send_email():
             'text': request.form.get('body'),
             'html': render_template('email_layout.html', body=Markup(misaka.html(request.form.get('body'))), subject=request.form.get('subject')),
             'recipient-variables': json.dumps(recipient_variables)}
-        mailgun_response = requests.post('https://api.mailgun.net/v3/{}/messages'.format(app.config.get('mailgun')['domain']),
-            auth = ('api', app.config.get('mailgun')['key']),
-            data = email_data)
-        flash('Response from mailgun: {}'.format(mailgun_response.text))
-        return redirect(url_for('index'))
+        s = URLSafeSerializer(app.config.get('SECRET_KEY'))
+        return render_template('send_email_confirm.html',
+                               num_recipients=len(email_data['to']),
+                               email_body=Markup(misaka.html(request.form.get('body').replace('%recipient.name%', 'John Doe'))),
+                               email_data=email_data,
+                               email_data_json=s.dumps(email_data))
     else:
         return render_template('send_email.html', month=datetime.date.today().strftime('%B'), domain=app.config.get('mailgun', {}).get('domain'))
 
