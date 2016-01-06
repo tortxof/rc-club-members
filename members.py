@@ -34,6 +34,8 @@ if os.path.isfile('/members-data/mailgun.json'):
 
 app.config['DEBUG'] = os.environ.get('FLASK_DEBUG', 'false').lower() == 'true'
 
+app.config['PERMANENT_SESSION_LIFETIME'] = 7257600
+
 members_db = members_database.MembersDatabase('/members-data/members.db')
 
 def login_required(f):
@@ -309,6 +311,7 @@ def ro_auth(slug):
     # 7257600 is 12 weeks in seconds.
     if data.get('readonly') and data.get('time') + 7257600 >= int(time.time()):
         session['readonly'] = True
+        session.permanent = True
         flash('You have read only access.')
         return render_template('ro_authorized.html')
     else:
