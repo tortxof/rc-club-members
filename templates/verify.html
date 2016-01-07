@@ -1,7 +1,7 @@
 {% extends 'layout.html' %}
 {% block body %}
 <p>Last Name: {{ record.last }}<br />AMA: {{ record.ama }}</p>
-<form action="http://www.modelaircraft.org/MembershipQuery.aspx" method="post">
+<form action="https://www.modelaircraft.org/MembershipQuery.aspx" method="post">
   <input type="hidden" name="ctl00$ContentPlaceHolder1$txtAmaNumber" value="{{ record.ama }}">
   <input type="hidden" name="ctl00$ContentPlaceHolder1$txtLastName" value="{{ record.last }}">
   <input type="hidden" name="__EVENTVALIDATION" value="{{ eventvalidation }}">

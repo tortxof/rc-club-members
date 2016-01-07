@@ -231,7 +231,7 @@ def json_import():
 @login_required
 def verify():
     record = members_db.get(request.args.get('mid'))[0]
-    ama_url = 'http://www.modelaircraft.org/MembershipQuery.aspx'
+    ama_url = 'https://www.modelaircraft.org/MembershipQuery.aspx'
     ama_page = requests.get(ama_url)
     soup = BeautifulSoup(ama_page.text)
     viewstate = soup.find_all('input', attrs={'name':'__VIEWSTATE'})[0]['value']
