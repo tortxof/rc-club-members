@@ -193,11 +193,14 @@ def all(args):
         worksheet = workbook.add_worksheet('Members')
         worksheet.set_landscape()
         header = workbook.add_format({'bold': True, 'bottom': True})
+        gray_bg = workbook.add_format({'bg_color': '#DDDDDD'})
         for col, name in enumerate(col_names):
             worksheet.write(0, col, name[1], header)
         for row, record in enumerate(records, start=1):
             for col, field in enumerate(col_names):
                 worksheet.write(row, col, record.get(field[0]))
+        for row in range(2, len(records)+1, 2):
+            worksheet.set_row(row, None, gray_bg)
         worksheet.merge_range(len(records)+2, 0, len(records)+2, len(col_names)-1, '{} members'.format(len(records)))
         worksheet.merge_range(len(records)+3, 0, len(records)+3, len(col_names)-1, 'Generated: {}'.format(datetime.date.today().isoformat()))
         worksheet.print_area(0, 0, len(records)+3, len(col_names)-1)
