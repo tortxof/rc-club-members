@@ -140,6 +140,17 @@ class MembersDatabase(object):
         conn.close()
         return [dict(record) for record in records]
 
+    def active(self):
+        '''Depending on current month, return previous or current members.'''
+        conn = sqlite3.connect(':memory:')
+        date = conn.execute('select date("now")').fetchone()[0]
+        conn.close()
+        print(date)
+        if int(date.split('-')[1]) <= 3:
+            return self.previous()
+        else:
+            return self.current()
+
     def end_of_year(self):
         conn = sqlite3.connect(':memory:')
         out = conn.execute('select date("now","+1 year","start of year","-1 day")').fetchone()[0]

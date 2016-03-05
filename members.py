@@ -164,6 +164,8 @@ def all(args):
         records = members_db.current()
     elif 'previous' in args:
         records = members_db.previous()
+    elif 'active' in args:
+        records = members_db.active()
     else:
         records = members_db.all()
 
