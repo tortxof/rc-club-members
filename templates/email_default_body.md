@@ -6,4 +6,4 @@ The {{ month }} newsletter is here.
 
 [PDF]()
 
-[Roster]()
+[Roster]({{ ro_url }})

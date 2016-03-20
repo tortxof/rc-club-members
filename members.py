@@ -33,10 +33,20 @@ if os.path.isfile('/members-data/mailgun.json'):
         app.config['mailgun'] = json.load(f)
 
 app.config['DEBUG'] = os.environ.get('FLASK_DEBUG', 'false').lower() == 'true'
+app.config['APP_URL'] = os.environ.get('APP_URL')
 
 app.config['PERMANENT_SESSION_LIFETIME'] = 7257600
 
 members_db = members_database.MembersDatabase('/members-data/members.db')
+
+def gen_ro_token():
+    '''Return only the token (slug) portion of the ro link.'''
+    s = URLSafeSerializer(app.config.get('SECRET_KEY'))
+    data = {
+        'time': int(time.time()),
+        'readonly': True,
+        }
+    return s.dumps(data)
 
 def login_required(f):
     @wraps(f)
@@ -290,18 +300,18 @@ def send_email():
                                email_data=email_data,
                                email_data_json=s.dumps(email_data))
     else:
-        return render_template('send_email.html', month=datetime.date.today().strftime('%B'), domain=app.config.get('mailgun', {}).get('domain'))
+        ro_url = app.config.get('APP_URL') + '/ro/' + gen_ro_token()
+        return render_template(
+            'send_email.html', month=datetime.date.today().strftime('%B'),
+            domain=app.config.get('mailgun', {}).get('domain'),
+            ro_url=ro_url
+            )
 
 @app.route('/get-ro-token')
 @login_required
 def get_ro_token():
     if 'appuser' in session:
-        s = URLSafeSerializer(app.config.get('SECRET_KEY'))
-        data = {}
-        data['time'] = int(time.time())
-        data['readonly'] = True
-        slug = s.dumps(data)
-        return render_template('get_ro_token.html', slug=slug)
+        return render_template('get_ro_token.html', slug=gen_ro_token())
     else:
         return redirect(url_for('index'))
 
