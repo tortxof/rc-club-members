@@ -4,18 +4,19 @@
 
 ## Installation
 
-You can deploy this app with [Docker](https://www.docker.com/).
-The Docker image runs a uwsgi server speaking uwsgi by default.
-For deployment you'll need nginx to reverse proxy.
-To have the uwsgi server speak HTTP, see the section below about running in
-development mode.
+You can deploy this app with [Docker](https://www.docker.com/). The Docker image
+runs a uwsgi server speaking uwsgi by default. For deployment you'll need nginx
+to reverse proxy. To have the uwsgi server speak HTTP, see the section below
+about running in development mode. When running the Docker container, set the
+`APP_URL` environment variable to the url of the app, without the trailing `/`.
+For example `APP_URL=https://members.example.com`.
 
 ### Docker
 
 Pull the image from Docker Hub and run it.
 
     docker pull tortxof/rc-club-members
-    docker run -d --restart always --name members-app -p 5000:5000 tortxof/rc-club-members
+    docker run -d --restart always --name members-app -e APP_URL=https://members.example.com -p 5000:5000 tortxof/rc-club-members
 
 Then create a
 [data container](https://docs.docker.com/userguide/dockervolumes/#creating-and-mounting-a-data-volume-container)
