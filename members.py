@@ -49,7 +49,9 @@ def gen_ro_token():
 def login_required(f):
     @wraps(f)
     def wrapper(*args, **kwargs):
-        if ('appuser' in session) or (('readonly' in session) and (request.method == 'GET')):
+        if (('appuser' in session) or
+            (('readonly' in session) and (request.method == 'GET'))
+            ):
             return f(*args, **kwargs)
         else:
             flash('You are not logged in.')
@@ -66,7 +68,8 @@ def setup():
     if not os.path.isfile(members_db.dbfile):
         if request.method == 'POST':
             members_db.new_db()
-            members_db.new_appuser(request.form['appuser'], request.form['password'])
+            members_db.new_appuser(request.form['appuser'],
+                                   request.form['password'])
             flash('New database created.')
             return redirect(url_for('login'))
         else:
@@ -79,7 +82,8 @@ def setup():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        if members_db.password_valid(request.form['appuser'], request.form['password']):
+        if members_db.password_valid(request.form['appuser'],
+                                     request.form['password']):
             session['appuser'] = request.form['appuser']
             flash('You are now logged in.')
             return redirect(url_for('index'))
@@ -100,7 +104,8 @@ def logout():
 @login_required
 def new_user():
     if request.method == 'POST':
-        members_db.new_appuser(request.form['appuser'], request.form['password'])
+        members_db.new_appuser(request.form['appuser'],
+                               request.form['password'])
         flash('New user created.')
         return redirect(url_for('index'))
     else:
@@ -155,7 +160,8 @@ def delete():
         records = members_db.get(mid)
         if records:
             flash('Are you sure you want to delete this record?')
-            return render_template('confirm_delete.html', records=records, mid=mid)
+            return render_template('confirm_delete.html',
+                                   records=records, mid=mid)
         else:
             flash('Record not found.')
             return redirect(url_for('index'))
@@ -211,13 +217,24 @@ def all(args):
                 worksheet.write(row, col, record.get(field[0]))
         for row in range(2, len(records)+1, 2):
             worksheet.set_row(row, None, gray_bg)
-        worksheet.merge_range(len(records)+2, 0, len(records)+2, len(col_names)-1, '{} members'.format(len(records)))
-        worksheet.merge_range(len(records)+3, 0, len(records)+3, len(col_names)-1, 'Generated: {}'.format(datetime.date.today().isoformat()))
+        worksheet.merge_range(
+            len(records)+2, 0, len(records)+2, len(col_names)-1,
+            '{} members'.format(len(records))
+            )
+        worksheet.merge_range(
+            len(records)+3, 0, len(records)+3, len(col_names)-1,
+            'Generated: {}'.format(datetime.date.today().isoformat())
+            )
         worksheet.print_area(0, 0, len(records)+3, len(col_names)-1)
         worksheet.fit_to_pages(1, 1)
         workbook.close()
         xlsx_data.seek(0)
-        return send_file(xlsx_data, as_attachment=True, attachment_filename='bsrcc-roster-{}.xlsx'.format(datetime.date.today().isoformat()))
+        return send_file(
+            xlsx_data, as_attachment=True,
+            attachment_filename='bsrcc-roster-{}.xlsx'.format(
+                datetime.date.today().isoformat()
+                )
+            )
     else:
         flash('{} records found.'.format(len(records)))
         return render_template('records.html', records=records)
@@ -248,9 +265,17 @@ def verify():
     ama_page = requests.get(ama_url)
     soup = BeautifulSoup(ama_page.text)
     viewstate = soup.find_all('input', attrs={'name':'__VIEWSTATE'})[0]['value']
-    eventvalidation = soup.find_all('input', attrs={'name':'__EVENTVALIDATION'})[0]['value']
-    flash('By clicking Verify you will be submitting the following name and AMA number on modelaircraft.org to verify membership.')
-    return render_template('verify.html', record=record, eventvalidation=eventvalidation, viewstate=viewstate)
+    eventvalidation = soup.find_all(
+        'input', attrs={'name':'__EVENTVALIDATION'}
+        )[0]['value']
+    flash(
+        'By clicking Verify you will be submitting the following name and '
+        'AMA number on modelaircraft.org to verify membership.'
+        )
+    return render_template(
+        'verify.html', record=record,
+        eventvalidation=eventvalidation, viewstate=viewstate
+        )
 
 @app.route('/send', methods=['GET', 'POST'])
 @login_required
@@ -263,9 +288,13 @@ def send_email():
             except:
                 flash('Error decoding email data.')
                 return redirect(url_for('send_email'))
-            mailgun_response = requests.post('https://api.mailgun.net/v3/{}/messages'.format(app.config.get('MAILGUN_DOMAIN')),
+            mailgun_response = requests.post(
+                'https://api.mailgun.net/v3/{}/messages'.format(
+                    app.config.get('MAILGUN_DOMAIN')
+                    ),
                 auth = ('api', app.config.get('MAILGUN_KEY')),
-                data = email_data)
+                data = email_data
+                )
             flash('Response from mailgun: {}'.format(mailgun_response.text))
             return redirect(url_for('index'))
         if 'send-current' in request.form:
@@ -285,18 +314,32 @@ def send_email():
                 recipient_variables[member.get('email')] = {}
                 recipient_variables[member.get('email')]['name'] = '{} {}'.format(member.get('first'), member.get('last'))
                 recipient_variables[member.get('email')]['id'] = member.get('mid')
-        email_data = {'from': '{} <{}@{}>'.format(request.form.get('from-name'), request.form.get('from-email'), app.config.get('MAILGUN_DOMAIN')),
+        email_data = {
+            'from': '{} <{}@{}>'.format(
+                request.form.get('from-name'),
+                request.form.get('from-email'),
+                app.config.get('MAILGUN_DOMAIN')
+                ),
             'to': [email for email in recipient_variables.keys()],
             'subject': request.form.get('subject'),
             'text': request.form.get('body'),
-            'html': render_template('email_layout.html', body=Markup(misaka.html(request.form.get('body'))), subject=request.form.get('subject')),
-            'recipient-variables': json.dumps(recipient_variables)}
+            'html': render_template(
+                'email_layout.html',
+                body=Markup(misaka.html(request.form.get('body'))),
+                subject=request.form.get('subject')
+                ),
+            'recipient-variables': json.dumps(recipient_variables)
+            }
         s = URLSafeSerializer(app.config.get('SECRET_KEY'))
-        return render_template('send_email_confirm.html',
-                               num_recipients=len(email_data['to']),
-                               email_body=Markup(misaka.html(request.form.get('body').replace('%recipient.name%', 'John Doe'))),
-                               email_data=email_data,
-                               email_data_json=s.dumps(email_data))
+        return render_template(
+            'send_email_confirm.html',
+            num_recipients=len(email_data['to']),
+            email_body=Markup(misaka.html(
+                request.form.get('body').replace('%recipient.name%', 'John Doe')
+                )),
+            email_data=email_data,
+            email_data_json=s.dumps(email_data)
+            )
     else:
         ro_url = app.config.get('APP_URL') + '/ro/' + gen_ro_token()
         return render_template(
