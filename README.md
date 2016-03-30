@@ -18,8 +18,8 @@ setting environment variables in docker.
 
 Flask also needs a `SECRET_KEY`. If one is not provided it will be randomly
 generated. If `SECRET_KEY` changes, login sessions and ro tokens will become
-invalid, so it should be provided. You can run `gen_keys.py` to have several
-keys generated for you.
+invalid, so it should be provided. The keys are expected to be URL-safe base64
+encoded. You can run `gen_keys.py` to have several keys generated for you.
 
     docker run --rm tortxof/rc-club-members python gen_keys.py
 
