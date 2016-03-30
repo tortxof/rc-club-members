@@ -24,7 +24,7 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = base64.urlsafe_b64decode(
     os.environ.setdefault(
         'SECRET_KEY',
-        base64.urlsafe_b64encode(os.urandom(32))
+        base64.urlsafe_b64encode(os.urandom(24)).decode()
         )
     )
 
