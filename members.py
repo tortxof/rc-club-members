@@ -12,7 +12,8 @@ import datetime
 import requests
 from bs4 import BeautifulSoup
 import xlsxwriter
-from flask import Flask, Markup, session, render_template, flash, request, redirect, url_for, jsonify, send_file
+from flask import (Flask, Markup, session, render_template,
+                   flash, request, redirect, url_for, jsonify, send_file)
 from itsdangerous import URLSafeSerializer
 import misaka
 
@@ -312,8 +313,10 @@ def send_email():
         for member in members:
             if member.get('email'):
                 recipient_variables[member.get('email')] = {}
-                recipient_variables[member.get('email')]['name'] = '{} {}'.format(member.get('first'), member.get('last'))
-                recipient_variables[member.get('email')]['id'] = member.get('mid')
+                recipient_variables[member.get('email')]['name'] = \
+                    '{} {}'.format(member.get('first'), member.get('last'))
+                recipient_variables[member.get('email')]['id'] = \
+                    member.get('mid')
         email_data = {
             'from': '{} <{}@{}>'.format(
                 request.form.get('from-name'),
