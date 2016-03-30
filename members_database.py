@@ -41,7 +41,9 @@ class MembersDatabase(object):
         return fields
 
     def get_fields_str(self):
-        '''Turns column names from get_fields() into a string for sqlite named style placeholders.'''
+        '''Turns column names from get_fields() into a
+        string for sqlite named style placeholders.
+        '''
         fields = tuple(':' + i for i in self.get_fields())
         return ', '.join(fields)
 
@@ -51,7 +53,9 @@ class MembersDatabase(object):
 
     def num_appusers(self):
         conn = self.db_conn()
-        count = conn.execute('select count(appuser) from appusers').fetchone()[0]
+        count = conn.execute(
+            'select count(appuser) from appusers'
+            ).fetchone()[0]
         conn.close()
         return count
 
@@ -64,13 +68,17 @@ class MembersDatabase(object):
     def new_appuser(self, appuser, password):
         password_hash = generate_password_hash(password, method='pbkdf2:sha256')
         conn = self.db_conn()
-        conn.execute('insert into appusers values(?, ?)', (appuser, password_hash))
+        conn.execute(
+            'insert into appusers values(?, ?)', (appuser, password_hash)
+            )
         conn.commit()
         conn.close()
 
     def password_valid(self, appuser, password):
         conn = self.db_conn()
-        password_hash = conn.execute('select password from appusers where appuser=?', (appuser,)).fetchone()
+        password_hash = conn.execute(
+            'select password from appusers where appuser=?', (appuser,)
+            ).fetchone()
         conn.close()
         if not password_hash:
             return False
@@ -79,7 +87,9 @@ class MembersDatabase(object):
     def add(self, record):
         record['mid'] = self.mk_id()
         conn = self.db_conn()
-        conn.execute('insert into members values(' + self.get_fields_str() + ')', record)
+        conn.execute(
+            'insert into members values(' + self.get_fields_str() + ')', record
+            )
         conn.commit()
         conn.close()
         self.rebuild()
@@ -91,7 +101,9 @@ class MembersDatabase(object):
         for record in records:
             if not record.get('mid'):
                 record['mid'] = self.mk_id()
-            conn.execute('insert into members values(' + fields_str + ')', record)
+            conn.execute(
+                'insert into members values(' + fields_str + ')', record
+                )
         conn.commit()
         conn.close()
         self.rebuild()
@@ -102,7 +114,10 @@ class MembersDatabase(object):
         record = tuple(record.get(field) for field in fields)
         set_string = ','.join(field + '=?' for field in fields)
         conn = self.db_conn()
-        conn.execute('update members set ' + set_string + ' where mid=?', record + (mid,))
+        conn.execute(
+            'update members set ' + set_string + ' where mid=?',
+            record + (mid,)
+            )
         conn.commit()
         conn.close()
         self.rebuild()
@@ -116,7 +131,9 @@ class MembersDatabase(object):
 
     def get(self, mid):
         conn = self.db_conn()
-        record = conn.execute('select * from members where mid=?', (mid,)).fetchone()
+        record = conn.execute(
+            'select * from members where mid=?', (mid,)
+            ).fetchone()
         conn.close()
         if record:
             return [dict(record)]
@@ -125,25 +142,34 @@ class MembersDatabase(object):
 
     def all(self):
         conn = self.db_conn()
-        records = conn.execute('select * from members' + self.sort_sql).fetchall()
+        records = conn.execute(
+            'select * from members' + self.sort_sql
+            ).fetchall()
         conn.close()
         return [dict(record) for record in records]
 
     def expired(self):
         conn = self.db_conn()
-        records = conn.execute('select * from members where expire<date("now")' + self.sort_sql).fetchall()
+        records = conn.execute(
+            'select * from members where expire<date("now")' + self.sort_sql
+            ).fetchall()
         conn.close()
         return [dict(record) for record in records]
 
     def current(self):
         conn = self.db_conn()
-        records = conn.execute('select * from members where expire>=date("now")' + self.sort_sql).fetchall()
+        records = conn.execute(
+            'select * from members where expire>=date("now")' + self.sort_sql
+            ).fetchall()
         conn.close()
         return [dict(record) for record in records]
 
     def previous(self):
         conn = self.db_conn()
-        records = conn.execute('select * from members where expire>=date("now","start of year","-1 day")' + self.sort_sql).fetchall()
+        records = conn.execute(
+            'select * from members where '
+            'expire>=date("now","start of year","-1 day")' + self.sort_sql
+            ).fetchall()
         conn.close()
         return [dict(record) for record in records]
 
@@ -160,6 +186,10 @@ class MembersDatabase(object):
 
     def search(self, query):
         conn = self.db_conn()
-        records = conn.execute('select * from members_fts where members_fts match ?' + self.sort_sql, (query,)).fetchall()
+        records = conn.execute(
+            'select * from members_fts where '
+            'members_fts match ?' + self.sort_sql,
+            (query,)
+            ).fetchall()
         conn.close()
         return [dict(record) for record in records]
