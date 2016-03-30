@@ -27,9 +27,8 @@ app.config['SECRET_KEY'] = base64.urlsafe_b64decode(
         )
     )
 
-if os.path.isfile('/members-data/mailgun.json'):
-    with open('/members-data/mailgun.json') as f:
-        app.config['mailgun'] = json.load(f)
+app.config['MAILGUN_DOMAIN'] = os.environ.get('MAILGUN_DOMAIN')
+app.config['MAILGUN_KEY'] = os.environ.get('MAILGUN_KEY')
 
 app.config['DEBUG'] = os.environ.get('FLASK_DEBUG', 'false').lower() == 'true'
 app.config['APP_URL'] = os.environ.get('APP_URL')
@@ -264,8 +263,8 @@ def send_email():
             except:
                 flash('Error decoding email data.')
                 return redirect(url_for('send_email'))
-            mailgun_response = requests.post('https://api.mailgun.net/v3/{}/messages'.format(app.config.get('mailgun')['domain']),
-                auth = ('api', app.config.get('mailgun')['key']),
+            mailgun_response = requests.post('https://api.mailgun.net/v3/{}/messages'.format(app.config.get('MAILGUN_DOMAIN')),
+                auth = ('api', app.config.get('MAILGUN_KEY')),
                 data = email_data)
             flash('Response from mailgun: {}'.format(mailgun_response.text))
             return redirect(url_for('index'))
@@ -286,7 +285,7 @@ def send_email():
                 recipient_variables[member.get('email')] = {}
                 recipient_variables[member.get('email')]['name'] = '{} {}'.format(member.get('first'), member.get('last'))
                 recipient_variables[member.get('email')]['id'] = member.get('mid')
-        email_data = {'from': '{} <{}@{}>'.format(request.form.get('from-name'), request.form.get('from-email'), app.config.get('mailgun')['domain']),
+        email_data = {'from': '{} <{}@{}>'.format(request.form.get('from-name'), request.form.get('from-email'), app.config.get('MAILGUN_DOMAIN')),
             'to': [email for email in recipient_variables.keys()],
             'subject': request.form.get('subject'),
             'text': request.form.get('body'),
@@ -302,7 +301,7 @@ def send_email():
         ro_url = app.config.get('APP_URL') + '/ro/' + gen_ro_token()
         return render_template(
             'send_email.html', month=datetime.date.today().strftime('%B'),
-            domain=app.config.get('mailgun', {}).get('domain'),
+            domain=app.config.get('MAILGUN_DOMAIN'),
             ro_url=ro_url
             )
 
