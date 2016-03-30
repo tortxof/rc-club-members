@@ -2,8 +2,8 @@
 
 from functools import wraps
 import os
-import stat
 import io
+import base64
 import csv
 import json
 import time
@@ -20,13 +20,12 @@ import members_database
 
 app = Flask(__name__)
 
-if not os.path.isfile('/members-data/key'):
-    with open('/members-data/key', 'wb') as f:
-        f.write(os.urandom(32))
-    os.chmod('/members-data/key', stat.S_IREAD)
-
-with open('/members-data/key', 'rb') as f:
-    app.config['SECRET_KEY'] = f.read()
+app.config['SECRET_KEY'] = base64.urlsafe_b64decode(
+    os.environ.setdefault(
+        'SECRET_KEY',
+        base64.urlsafe_b64encode(os.urandom(32))
+        )
+    )
 
 if os.path.isfile('/members-data/mailgun.json'):
     with open('/members-data/mailgun.json') as f:
