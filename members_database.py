@@ -7,6 +7,24 @@ class MembersDatabase(object):
     def __init__(self, dbfile):
         self.sort_sql = ' order by expire desc, last asc, first asc'
         self.dbfile = dbfile
+        conn = self.db_conn()
+        conn.execute(
+            'create table if not exists members '
+            '(mid text primary key not null, first, last, ama, phone, '
+            'address, city, state, zip, email, expire)'
+            )
+        conn.execute(
+            'create virtual table if not exists members_fts using '
+            'fts4(content="members", mid, first, last, ama, phone, '
+            'address, city, state, zip, email, expire, '
+            'notindexed=mid, notindexed=expire)'
+            )
+        conn.execute(
+            'create table if not exists appusers '
+            '(appuser text primary key not null, password text)'
+            )
+        conn.commit()
+        conn.close()
 
     def db_conn(self):
         conn = sqlite3.connect(self.dbfile)
@@ -40,13 +58,11 @@ class MembersDatabase(object):
             out += alphabet[remainder]
         return out[::-1]
 
-    def new_db(self):
+    def num_appusers(self):
         conn = self.db_conn()
-        conn.execute('create table members (mid text primary key not null, first, last, ama, phone, address, city, state, zip, email, expire)')
-        conn.execute('create virtual table members_fts using fts4(content="members", mid, first, last, ama, phone, address, city, state, zip, email, expire, notindexed=mid, notindexed=expire)')
-        conn.execute('create table appusers (appuser text primary key not null, password text)')
-        conn.commit()
+        count = conn.execute('select count(appuser) from appusers').fetchone()[0]
         conn.close()
+        return count
 
     def rebuild(self):
         conn = self.db_conn()
@@ -150,12 +166,6 @@ class MembersDatabase(object):
             return self.previous()
         else:
             return self.current()
-
-    def end_of_year(self):
-        conn = sqlite3.connect(':memory:')
-        out = conn.execute('select date("now","+1 year","start of year","-1 day")').fetchone()[0]
-        conn.close()
-        return out
 
     def search(self, query):
         conn = self.db_conn()

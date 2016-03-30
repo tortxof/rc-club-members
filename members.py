@@ -62,22 +62,22 @@ def login_required(f):
 @app.route('/')
 @login_required
 def index():
-    return render_template('index.html', expire=members_db.end_of_year())
+    end_of_year = datetime.date.today().replace(month=12, day=31).isoformat()
+    return render_template('index.html', expire=end_of_year)
 
 @app.route('/setup', methods=['GET', 'POST'])
 def setup():
-    if not os.path.isfile(members_db.dbfile):
+    if members_db.num_appusers() == 0:
         if request.method == 'POST':
-            members_db.new_db()
             members_db.new_appuser(request.form['appuser'],
                                    request.form['password'])
-            flash('New database created.')
+            flash('Admin user created.')
             return redirect(url_for('login'))
         else:
             flash('Create the first user.')
             return render_template('setup.html')
     else:
-        flash('Database already exists.')
+        flash('Admin user already exists.')
         return redirect(url_for('index'))
 
 @app.route('/login', methods=['GET', 'POST'])
