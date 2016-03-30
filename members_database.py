@@ -1,4 +1,5 @@
 import os
+import base64
 import sqlite3
 
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -46,17 +47,7 @@ class MembersDatabase(object):
 
     def mk_id(self):
         '''Generate a random unique id.'''
-        alphabet = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
-        base = len(alphabet)
-        i = int.from_bytes(os.urandom(16), 'little')
-        out = ''
-        if i == 0:
-            out = alphabet[0]
-        while i > 0:
-            remainder = i % base
-            i = i // base
-            out += alphabet[remainder]
-        return out[::-1]
+        return base64.urlsafe_b64encode(os.urandom(24)).decode()
 
     def num_appusers(self):
         conn = self.db_conn()
