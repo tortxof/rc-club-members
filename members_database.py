@@ -140,7 +140,7 @@ class MembersDatabase(object):
         else:
             return []
 
-    def all(self):
+    def get_all(self):
         conn = self.db_conn()
         records = conn.execute(
             'select * from members' + self.sort_sql

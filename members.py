@@ -170,7 +170,7 @@ def delete():
 @app.route('/all', defaults={'args': ''})
 @app.route('/all/<path:args>')
 @login_required
-def all(args):
+def list_members(args):
     args = args.split('/')
 
     if 'expired' in args:
@@ -182,7 +182,7 @@ def all(args):
     elif 'active' in args:
         records = members_db.active()
     else:
-        records = members_db.all()
+        records = members_db.get_all()
 
     if 'email' in args:
         emails = ''
@@ -244,7 +244,7 @@ def all(args):
 @app.route('/export')
 @login_required
 def json_export():
-    return jsonify(members=members_db.all())
+    return jsonify(members=members_db.get_all())
 
 @app.route('/import', methods=['GET', 'POST'])
 @login_required
