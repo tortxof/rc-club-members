@@ -314,11 +314,11 @@ def send_email():
             if member.get('email'):
                 recipient_variables[member.get('email')] = {}
                 recipient_variables[member.get('email')]['name'] = \
-                    '{} {}'.format(member.get('first'), member.get('last'))
+                    '{0} {1}'.format(member.get('first'), member.get('last'))
                 recipient_variables[member.get('email')]['id'] = \
                     member.get('mid')
         email_data = {
-            'from': '{} <{}@{}>'.format(
+            'from': '{0} <{1}@{2}>'.format(
                 request.form.get('from-name'),
                 request.form.get('from-email'),
                 app.config.get('MAILGUN_DOMAIN')
