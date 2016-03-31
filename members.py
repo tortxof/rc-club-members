@@ -188,7 +188,7 @@ def list_members(args):
         emails = ''
         for record in records:
             email = record['email']
-            if len(email) > 0:
+            if email:
                 emails += email + '\n'
         flash('{} records found.'.format(len(records)))
         return render_template('text.html', content=emails)
