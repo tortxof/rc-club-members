@@ -47,7 +47,8 @@ class MembersDatabase(object):
         fields = tuple(':' + i for i in self.get_fields())
         return ', '.join(fields)
 
-    def mk_id(self):
+    @staticmethod
+    def mk_id():
         '''Generate a random unique id.'''
         return base64.urlsafe_b64encode(os.urandom(24)).decode()
 
