@@ -31,13 +31,13 @@
           <span class="icon-bar"></span>
           <span class="icon-bar"></span>
         </button>
-        <a class="navbar-brand" href="#">RC Club Members</a>
+        <a class="navbar-brand" href="/">RC Club Members</a>
       </div>
       <div id="navbar" class="collapse navbar-collapse">
         <ul class="nav navbar-nav">
-          <li><a href="/">Home</a></li>
           <li><a href="/all/active">Active</a></li>
           {% if session['appuser'] %}
+          <li><a href="/add">Add</a></li>
           <li><a href="/all">All</a></li>
           <li><a href="/all/current">Current</a></li>
           <li><a href="/all/previous">Previous Year</a></li>

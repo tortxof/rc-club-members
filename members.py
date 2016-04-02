@@ -62,8 +62,8 @@ def login_required(f):
 @app.route('/')
 @login_required
 def index():
-    end_of_year = datetime.date.today().replace(month=12, day=31).isoformat()
-    return render_template('index.html', expire=end_of_year)
+    records = members_db.active()
+    return render_template('records_table.html', records=records)
 
 @app.route('/setup', methods=['GET', 'POST'])
 def setup():
@@ -128,7 +128,8 @@ def add():
         flash('Record added.')
         return render_template('records.html', records=members_db.get(mid))
     else:
-        return redirect(url_for('index'))
+        end_of_year = datetime.date.today().replace(month=12, day=31).isoformat()
+        return render_template('add.html', expire=end_of_year)
 
 @app.route('/member/<mid>')
 @login_required
