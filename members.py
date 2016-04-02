@@ -130,6 +130,12 @@ def add():
     else:
         return redirect(url_for('index'))
 
+@app.route('/member/<mid>')
+@login_required
+def get_member(mid):
+    records = members_db.get(mid)
+    return render_template('records.html', records=records)
+
 @app.route('/edit', methods=['GET', 'POST'])
 @login_required
 def edit():
@@ -238,7 +244,7 @@ def list_members(args):
             )
     else:
         flash('{} records found.'.format(len(records)))
-        return render_template('records.html', records=records)
+        return render_template('records_table.html', records=records)
 
 
 @app.route('/export')

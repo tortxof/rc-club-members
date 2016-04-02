@@ -1,0 +1,30 @@
+{% extends 'layout.html' %}
+{% block body %}
+{% include 'search.html' %}
+<div class="table-responsive">
+  <table class="table table-striped">
+    <tr>
+      <th>First Name</th>
+      <th>Last Name</th>
+      <th>AMA Number</th>
+      <th>Email</th>
+      <th>Address</th>
+      <th>City</th>
+      <th>State</th>
+      <th>ZIP</th>
+    </tr>
+    {% for record in records %}
+    <tr>
+      <td><a href="/member/{{ record.mid }}">{{ record.first }}</a></td>
+      <td><a href="/member/{{ record.mid }}">{{ record.last }}</a></td>
+      <td><a href="/verify?mid={{ record.mid }}">{{ record.ama }}</a></td>
+      <td><a href="mailto:{{ record.email }}">{{ record.email }}</a></td>
+      <td>{{ record.address }}</td>
+      <td>{{ record.city }}</td>
+      <td>{{ record.state }}</td>
+      <td>{{ record.zip }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+</div>
+{% endblock %}
