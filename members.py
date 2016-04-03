@@ -28,6 +28,8 @@ app.config['SECRET_KEY'] = base64.urlsafe_b64decode(
         )
     )
 
+app.config['GA_ID'] = os.environ.get('GA_ID')
+
 app.config['MAILGUN_DOMAIN'] = os.environ.get('MAILGUN_DOMAIN')
 app.config['MAILGUN_KEY'] = os.environ.get('MAILGUN_KEY')
 
