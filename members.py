@@ -88,6 +88,7 @@ def login():
         if members_db.password_valid(request.form['appuser'],
                                      request.form['password']):
             session['appuser'] = request.form['appuser']
+            session.permanent = True
             flash('You are now logged in.')
             return redirect(url_for('index'))
         else:
