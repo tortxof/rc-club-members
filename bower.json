@@ -17,7 +17,6 @@
     "tests"
   ],
   "dependencies": {
-    "bootstrap": "^3.3.6",
-    "datedropper": "*"
+    "bootstrap": "^3.3.6"
   }
 }
