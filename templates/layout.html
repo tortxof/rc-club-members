@@ -9,9 +9,9 @@
 
   <title>RC Club Members{% if session['appuser'] %} - {{ session['appuser'] }}{% endif %}</title>
 
-  <link href="/static/css/bootstrap.min.css" rel="stylesheet">
+  <link href="/static/components/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
 
-  <link rel="stylesheet" type="text/css" href="/static/js/datedropper/datedropper.css">
+  <link rel="stylesheet" type="text/css" href="/static/components/datedropper/datedropper.min.css">
 
   <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
   <!--[if lt IE 9]>
@@ -117,10 +117,9 @@
     {% block body %}{% endblock %}
   </div><!-- /.container -->
 
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
-  <script src="/static/js/bootstrap.min.js"></script>
-  <script src="/static/js/datedropper/datedropper.min.js"></script>
-  <script>$( "#expire" ).dateDropper({format: "Y-m-d", maxYear: 2030, animate_current: false});</script>
+  <script src="/static/components/jquery/dist/jquery.min.js"></script>
+  <script src="/static/components/bootstrap/dist/js/bootstrap.min.js"></script>
+  <script src="/static/components/datedropper/datedropper.min.js"></script>
   <script src="/static/js/app.js"></script>
   {% if config.GA_ID %}
     <script>
