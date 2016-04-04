@@ -8,6 +8,7 @@
       <th>Last Name</th>
       <th>AMA Number</th>
       <th>Email</th>
+      <th>Phone</th>
       <th>Address</th>
       <th>City</th>
       <th>State</th>
@@ -19,6 +20,8 @@
       <td><a href="/member/{{ record.mid }}">{{ record.last }}</a></td>
       <td><a href="/verify?mid={{ record.mid }}">{{ record.ama }}</a></td>
       <td><a href="mailto:{{ record.email }}">{{ record.email }}</a></td>
+      {% set phone_numbers = record.phone.split() %}
+      <td>{{ phone_numbers | join('<br>'|safe) }}</td>
       <td>{{ record.address }}</td>
       <td>{{ record.city }}</td>
       <td>{{ record.state }}</td>
