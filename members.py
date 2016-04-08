@@ -312,6 +312,8 @@ def send_email():
             members = members_db.current()
         elif 'send-previous' in request.form:
             members = members_db.previous()
+        elif 'send-custom' in request.form:
+            members = json.loads(request.form.get('custom-list'))
         elif 'send-test' in request.form:
             members = [{'first': request.form.get('test-first'),
                         'last': request.form.get('test-last'),
