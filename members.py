@@ -12,12 +12,17 @@ import datetime
 import requests
 from bs4 import BeautifulSoup
 import xlsxwriter
-from flask import (Flask, Markup, session, render_template,
+from flask import (Flask, Markup, session, render_template, g,
                    flash, request, redirect, url_for, jsonify, send_file)
 from itsdangerous import URLSafeSerializer
+from werkzeug.security import generate_password_hash, check_password_hash
 import misaka
 
-import members_database
+from database import database, User, Member
+
+database.connect()
+database.create_tables([User, Member], safe=True)
+database.close()
 
 app = Flask(__name__)
 
@@ -38,7 +43,15 @@ app.config['APP_URL'] = os.environ.get('APP_URL')
 
 app.config['PERMANENT_SESSION_LIFETIME'] = 7257600
 
-members_db = members_database.MembersDatabase('/members-data/members.db')
+@app.before_request
+def before_request():
+    g.database = database
+    g.database.connect()
+
+@app.after_request
+def after_request(request):
+    g.database.close()
+    return request
 
 def gen_ro_token():
     '''Return only the token (slug) portion of the ro link.'''
@@ -64,15 +77,20 @@ def login_required(f):
 @app.route('/')
 @login_required
 def index():
-    records = members_db.active()
+    records = Member.active()
     return render_template('records_table.html', records=records)
 
 @app.route('/setup', methods=['GET', 'POST'])
 def setup():
-    if members_db.num_appusers() == 0:
+    if User.select().count() == 0:
         if request.method == 'POST':
-            members_db.new_appuser(request.form['appuser'],
-                                   request.form['password'])
+            User.create(
+                username = request.form['appuser'],
+                password = generate_password_hash(
+                    request.form['password'],
+                    method='pbkdf2:sha256'
+                    )
+                )
             flash('Admin user created.')
             return redirect(url_for('login'))
         else:
@@ -85,9 +103,9 @@ def setup():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        if members_db.password_valid(request.form['appuser'],
-                                     request.form['password']):
-            session['appuser'] = request.form['appuser']
+        user = User.get(User.username == request.form['appuser'])
+        if check_password_hash(user.password, request.form['password']):
+            session['appuser'] = user.username
             session.permanent = True
             flash('You are now logged in.')
             return redirect(url_for('index'))
@@ -108,8 +126,13 @@ def logout():
 @login_required
 def new_user():
     if request.method == 'POST':
-        members_db.new_appuser(request.form['appuser'],
-                               request.form['password'])
+        User.create(
+            username = request.form['appuser'],
+            password = generate_password_hash(
+                request.form['password'],
+                method='pbkdf2:sha256'
+                )
+            )
         flash('New user created.')
         return redirect(url_for('index'))
     else:
@@ -127,32 +150,38 @@ def search():
 @login_required
 def add():
     if request.method == 'POST':
-        mid = members_db.add(request.form.to_dict())
+        member = Member.create(**request.form.to_dict())
         flash('Record added.')
-        return render_template('records.html', records=members_db.get(mid))
+        return render_template('records.html', records=[member])
     else:
         end_of_year = datetime.date.today().replace(month=12, day=31).isoformat()
         return render_template('add.html', expire=end_of_year)
 
-@app.route('/member/<mid>')
+@app.route('/member/<member_id>')
 @login_required
-def get_member(mid):
-    records = members_db.get(mid)
-    return render_template('records.html', records=records)
+def get_member(member_id):
+    member = Member.get(Member.id == member_id)
+    return render_template('records.html', records=[member])
 
 @app.route('/edit', methods=['GET', 'POST'])
 @login_required
 def edit():
     if request.method == 'POST':
-        mid = request.form['mid']
-        members_db.edit(record=request.form.to_dict())
-        flash('Record updated.')
-        return render_template('records.html', records=members_db.get(mid))
+        num_updated = Member.update(
+            **request.form.to_dict()
+            ).where(
+            Member.id == request.form['id']
+            ).execute()
+        flash('{0} record updated.'.format(num_updated))
+        return render_template(
+            'records.html',
+            records=[Member.get(Member.id == request.form['id'])]
+            )
     else:
-        mid = request.args.get('mid')
-        records = members_db.get(mid)
-        if records:
-            return render_template('edit.html', record=records[0])
+        member_id = request.args.get('id')
+        member = Member.get(Member.id == member_id)
+        if member:
+            return render_template('edit.html', record=member)
         else:
             flash('Record not found.')
             return redirect(url_for('index'))
@@ -161,18 +190,18 @@ def edit():
 @login_required
 def delete():
     if request.method == 'POST':
-        mid = request.form['mid']
+        member_id = request.form['id']
+        member = Member.get(Member.id == member_id)
+        member.delete_instance(recursive=True)
         flash('Record deleted.')
-        out = render_template('records.html', records=members_db.get(mid))
-        members_db.remove(mid)
-        return out
+        return render_template('records.html', records=[member])
     else:
-        mid = request.args.get('mid')
-        records = members_db.get(mid)
-        if records:
+        member_id = request.args.get('id')
+        member = Member.get(Member.id == member_id)
+        if member:
             flash('Are you sure you want to delete this record?')
             return render_template('confirm_delete.html',
-                                   records=records, mid=mid)
+                                   records=[member], id=member_id)
         else:
             flash('Record not found.')
             return redirect(url_for('index'))
@@ -184,37 +213,39 @@ def list_members(args):
     args = args.split('/')
 
     if 'expired' in args:
-        records = members_db.expired()
+        records = Member.expired().dicts()
     elif 'current' in args:
-        records = members_db.current()
+        records = Member.current().dicts()
     elif 'previous' in args:
-        records = members_db.previous()
+        records = Member.previous().dicts()
     elif 'active' in args:
-        records = members_db.active()
+        records = Member.active().dicts()
     else:
-        records = members_db.get_all()
+        records = Member.select().dicts()
 
     if 'email' in args:
         emails = ''
         for record in records:
-            email = record['email']
+            email = record.get('email')
             if email:
                 emails += email + '\n'
         flash('{} records found.'.format(len(records)))
         return render_template('text.html', content=emails)
     elif 'csv' in args:
         csv_data = io.StringIO()
-        writer = csv.DictWriter(csv_data, fieldnames=members_db.get_fields())
+        writer = csv.DictWriter(csv_data, fieldnames=Member._meta.fields)
         writer.writeheader()
         for record in records:
             writer.writerow(record)
         flash('{} records found.'.format(len(records)))
         return render_template('text.html', content=csv_data.getvalue())
     elif 'xlsx' in args:
-        col_names = [('first', 'First'), ('last', 'Last'), ('ama', 'AMA'),
-        ('phone', 'Phone'), ('address', 'Address'), ('city', 'City'),
-        ('state', 'State'), ('zip', 'ZIP'), ('email', 'E-mail'),
-        ('expire', 'Expiration')]
+        col_names = [
+            ('first_name', 'First'), ('last_name', 'Last'),
+            ('ama', 'AMA'), ('phone', 'Phone'), ('address', 'Address'),
+            ('city', 'City'), ('state', 'State'), ('zip_code', 'ZIP'),
+            ('email', 'E-mail'), ('expire', 'Expiration')
+            ]
         xlsx_data = io.BytesIO()
         workbook = xlsxwriter.Workbook(xlsx_data)
         worksheet = workbook.add_worksheet('Members')
@@ -254,7 +285,10 @@ def list_members(args):
 @app.route('/export')
 @login_required
 def json_export():
-    return jsonify(members=members_db.get_all())
+    return jsonify(members=[
+        dict(member, expire=str(member['expire'])) for member in
+        Member.select().dicts()
+        ])
 
 @app.route('/import', methods=['GET', 'POST'])
 @login_required
@@ -262,8 +296,9 @@ def json_import():
     if request.method == 'POST':
         json_data = request.form['json_data']
         records = json.loads(json_data).get('members')
-        members_db.add_multiple(records)
-        flash('{} records imported.'.format(len(records)))
+        with database.atomic():
+            member_ids = Member.insert_many(records).execute()
+        flash('{} records imported.'.format(len(member_ids)))
         return redirect(url_for('index'))
     else:
         return render_template('import.html')
@@ -271,7 +306,7 @@ def json_import():
 @app.route('/verify')
 @login_required
 def verify():
-    record = members_db.get(request.args.get('mid'))[0]
+    record = Member.get(Member.id == request.args.get('id'))
     ama_url = 'https://www.modelaircraft.org/MembershipQuery.aspx'
     ama_page = requests.get(ama_url)
     soup = BeautifulSoup(ama_page.text)
@@ -309,9 +344,9 @@ def send_email():
             flash('Response from mailgun: {}'.format(mailgun_response.text))
             return redirect(url_for('index'))
         if 'send-current' in request.form:
-            members = members_db.current()
+            members = Member.current()
         elif 'send-previous' in request.form:
-            members = members_db.previous()
+            members = Member.previous()
         elif 'send-custom' in request.form:
             members = json.loads(request.form.get('custom-list'))
         elif 'send-test' in request.form:
@@ -328,7 +363,7 @@ def send_email():
                 recipient_variables[member.get('email')]['name'] = \
                     '{0} {1}'.format(member.get('first'), member.get('last'))
                 recipient_variables[member.get('email')]['id'] = \
-                    member.get('mid')
+                    member.get('id')
         email_data = {
             'from': '{0} <{1}@{2}>'.format(
                 request.form.get('from-name'),

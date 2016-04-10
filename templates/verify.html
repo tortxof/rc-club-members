@@ -1,9 +1,9 @@
 {% extends 'layout.html' %}
 {% block body %}
-<p>Last Name: {{ record.last }}<br />AMA: {{ record.ama }}</p>
+<p>Last Name: {{ record.last_name }}<br />AMA: {{ record.ama }}</p>
 <form action="https://www.modelaircraft.org/MembershipQuery.aspx" method="post">
   <input type="hidden" name="ctl00$ContentPlaceHolder1$txtAmaNumber" value="{{ record.ama }}">
-  <input type="hidden" name="ctl00$ContentPlaceHolder1$txtLastName" value="{{ record.last }}">
+  <input type="hidden" name="ctl00$ContentPlaceHolder1$txtLastName" value="{{ record.last_name }}">
   <input type="hidden" name="__EVENTVALIDATION" value="{{ eventvalidation }}">
   <input type="hidden" name="__VIEWSTATE" value="{{ viewstate }}">
   <button type="submit" name="ctl00$ContentPlaceHolder1$btnGo" value="Verify" class="btn btn-default">Verify</button>

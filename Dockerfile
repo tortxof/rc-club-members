@@ -8,11 +8,11 @@ WORKDIR /app
 RUN pip install -r requirements.txt
 COPY . /app/
 
-RUN mkdir /members-data && chown app:app /members-data
+RUN mkdir /data && chown app:app /data
 
 USER app
 
-VOLUME ["/members-data"]
+VOLUME ["/data"]
 
 EXPOSE 5000
 

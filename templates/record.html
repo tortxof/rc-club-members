@@ -4,17 +4,17 @@
 
     <div class="row">
       <div class="col-sm-3"><strong>First</strong></div>
-      <div class="col-sm-9">{{ record.first }}</div>
+      <div class="col-sm-9">{{ record.first_name }}</div>
     </div>
 
     <div class="row">
       <div class="col-sm-3"><strong>Last</strong></div>
-      <div class="col-sm-9">{{ record.last }}</div>
+      <div class="col-sm-9">{{ record.last_name }}</div>
     </div>
 
     <div class="row">
       <div class="col-sm-3"><strong>AMA</strong></div>
-      <div class="col-sm-9"><a href="/verify?mid={{ record.mid }}">{{ record.ama }}</a></div>
+      <div class="col-sm-9"><a href="/verify?id={{ record.id }}">{{ record.ama }}</a></div>
     </div>
 
     <div class="row">
@@ -39,7 +39,7 @@
 
     <div class="row">
       <div class="col-sm-3"><strong>Zip</strong></div>
-      <div class="col-sm-9">{{ record.zip }}</div>
+      <div class="col-sm-9">{{ record.zip_code }}</div>
     </div>
 
     <div class="row">
@@ -55,9 +55,9 @@
   </div>
 
   <div class="panel-footer">
-    <a href="/delete?mid={{ record.mid }}"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></a>
+    <a href="/delete?id={{ record.id }}"><span class="glyphicon glyphicon-trash" aria-hidden="true"></span></a>
     <span style="display:inline-block;width:1em;" aria-hidden="true"></span>
-    <a href="/edit?mid={{ record.mid }}"><span class="glyphicon glyphicon-pencil" aria-hidden="true"></span></a>
+    <a href="/edit?id={{ record.id }}"><span class="glyphicon glyphicon-pencil" aria-hidden="true"></span></a>
   </div>
 
 </div>

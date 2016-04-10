@@ -6,19 +6,19 @@
 
     <form class="form-horizontal" role="form" name="edit" enctype="multipart/form-data" action="/edit" method="post">
 
-      <input type="hidden" name="mid" value="{{ record.mid }}">
+      <input type="hidden" name="id" value="{{ record.id }}">
 
       <div class="form-group">
         <label class="col-sm-3 control-label">First</label>
         <div class="col-sm-9">
-          <input class="form-control" type="text" name="first" value="{{ record.first }}">
+          <input class="form-control" type="text" name="first_name" value="{{ record.first_name }}">
         </div>
       </div>
 
       <div class="form-group">
         <label class="col-sm-3 control-label">Last</label>
         <div class="col-sm-9">
-          <input class="form-control" type="text" name="last" value="{{ record.last }}">
+          <input class="form-control" type="text" name="last_name" value="{{ record.last_name }}">
         </div>
       </div>
 
@@ -60,7 +60,7 @@
       <div class="form-group">
         <label class="col-sm-3 control-label">Zip</label>
         <div class="col-sm-9">
-          <input class="form-control" type="text" name="zip" value="{{ record.zip }}">
+          <input class="form-control" type="text" name="zip_code" value="{{ record.zip_code }}">
         </div>
       </div>
 
