@@ -19,7 +19,7 @@
       <td><a href="/member/{{ record.id }}">{{ record.first_name }}</a></td>
       <td><a href="/member/{{ record.id }}">{{ record.last_name }}</a></td>
       <td><a href="/verify?id={{ record.id }}">{{ record.ama }}</a></td>
-      <td><a href="mailto:{{ record.email }}">{{ record.email }}</a></td>
+      <td>{% if record.email %}<a href="mailto:{{ record.email }}">{{ record.email }}</a>{% endif %}</td>
       {% set phone_numbers = record.phone.split() %}
       <td>{{ phone_numbers | join('<br>'|safe) }}</td>
       <td>{{ record.address }}</td>

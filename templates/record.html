@@ -44,7 +44,7 @@
 
     <div class="row">
       <div class="col-sm-3"><strong>Email</strong></div>
-      <div class="col-sm-9">{{ record.email }}</div>
+      <div class="col-sm-9">{% if record.email %}{{ record.email }}{% endif %}</div>
     </div>
 
     <div class="row">

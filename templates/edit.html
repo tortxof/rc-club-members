@@ -67,7 +67,7 @@
       <div class="form-group">
         <label class="col-sm-3 control-label">Email</label>
         <div class="col-sm-9">
-          <input class="form-control" type="email" name="email" value="{{ record.email }}">
+          <input class="form-control" type="email" name="email" value="{% if record.email %}{{ record.email }}{% endif %}">
         </div>
       </div>
 
