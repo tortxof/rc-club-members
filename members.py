@@ -18,10 +18,12 @@ from itsdangerous import URLSafeSerializer
 from werkzeug.security import generate_password_hash, check_password_hash
 import misaka
 
-from database import database, User, Member, IntegrityError
+from database import database, User, Member, MemberIndex, IntegrityError
 
 database.connect()
-database.create_tables([User, Member], safe=True)
+database.create_tables([User, Member, MemberIndex], safe=True)
+MemberIndex.rebuild()
+MemberIndex.optimize()
 database.close()
 
 app = Flask(__name__)
@@ -145,7 +147,7 @@ def new_user():
 @app.route('/search')
 @login_required
 def search():
-    records = members_db.search(request.args.get('query'))
+    records = MemberIndex.search(request.args.get('query'))
     flash('{} records found.'.format(len(records)))
     return render_template('records.html', records=records)
 
@@ -158,6 +160,8 @@ def add():
         except IntegrityError:
             flash('Could not add record. Email address already exists.')
             return redirect(url_for('index'))
+        MemberIndex.rebuild()
+        MemberIndex.optimize()
         flash('Record added.')
         return render_template('records.html', records=[member])
     else:
@@ -183,6 +187,8 @@ def edit():
         except IntegrityError:
             flash('Could not update record. Email address already exists.')
             return redirect(url_for('index'))
+        MemberIndex.rebuild()
+        MemberIndex.optimize()
         flash('Record updated.')
         return render_template(
             'records.html',
@@ -204,6 +210,8 @@ def delete():
         member_id = request.form['id']
         member = Member.get(Member.id == member_id)
         member.delete_instance(recursive=True)
+        MemberIndex.rebuild()
+        MemberIndex.optimize()
         flash('Record deleted.')
         return render_template('records.html', records=[member])
     else:
@@ -314,6 +322,8 @@ def json_import():
         records = json.loads(json_data).get('members')
         with database.atomic():
             if Member.insert_many(records).execute():
+                MemberIndex.rebuild()
+                MemberIndex.optimize()
                 flash('Records imported.')
             else:
                 flash('There was an error importing the records.')

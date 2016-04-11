@@ -3,15 +3,16 @@ import base64
 import datetime
 
 from peewee import (
-    Model, SqliteDatabase, ForeignKeyField, CharField, DateField,
+    Model, ForeignKeyField, CharField, DateField,
     IntegrityError
     )
+from playhouse.sqlite_ext import SqliteExtDatabase, FTSModel, SearchField
 
 def mk_id():
     """Generate a random unique id."""
     return base64.urlsafe_b64encode(os.urandom(15)).decode()
 
-database = SqliteDatabase('/data/data.db')
+database = SqliteExtDatabase('/data/data.db')
 
 class CharNullField(CharField):
     def db_value(self, value):
@@ -20,6 +21,10 @@ class CharNullField(CharField):
         return value
 
 class BaseModel(Model):
+    class Meta():
+        database = database
+
+class BaseFTSModel(FTSModel):
     class Meta():
         database = database
 
@@ -68,3 +73,18 @@ class Member(BaseModel):
             return Member.previous()
         else:
             return Member.current()
+
+class MemberIndex(BaseFTSModel):
+    first_name = SearchField()
+    last_name = SearchField()
+    ama = SearchField()
+    phone = SearchField()
+    address = SearchField()
+    city = SearchField()
+    state = SearchField()
+    zip_code = SearchField()
+    email = SearchField()
+    expire = SearchField()
+
+    class Meta:
+        extension_options = {'content': Member}
