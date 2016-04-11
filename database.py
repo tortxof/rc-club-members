@@ -75,6 +75,7 @@ class Member(BaseModel):
             return Member.current()
 
 class MemberIndex(BaseFTSModel):
+    id = SearchField()
     first_name = SearchField()
     last_name = SearchField()
     ama = SearchField()

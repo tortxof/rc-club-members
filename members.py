@@ -21,9 +21,9 @@ import misaka
 from database import database, User, Member, MemberIndex, IntegrityError
 
 database.connect()
+database.drop_tables([MemberIndex], safe=True)
 database.create_tables([User, Member, MemberIndex], safe=True)
 MemberIndex.rebuild()
-MemberIndex.optimize()
 database.close()
 
 app = Flask(__name__)
@@ -161,7 +161,6 @@ def add():
             flash('Could not add record. Email address already exists.')
             return redirect(url_for('index'))
         MemberIndex.rebuild()
-        MemberIndex.optimize()
         flash('Record added.')
         return render_template('records.html', records=[member])
     else:
@@ -188,7 +187,6 @@ def edit():
             flash('Could not update record. Email address already exists.')
             return redirect(url_for('index'))
         MemberIndex.rebuild()
-        MemberIndex.optimize()
         flash('Record updated.')
         return render_template(
             'records.html',
@@ -211,7 +209,6 @@ def delete():
         member = Member.get(Member.id == member_id)
         member.delete_instance(recursive=True)
         MemberIndex.rebuild()
-        MemberIndex.optimize()
         flash('Record deleted.')
         return render_template('records.html', records=[member])
     else:
@@ -323,7 +320,6 @@ def json_import():
         with database.atomic():
             if Member.insert_many(records).execute():
                 MemberIndex.rebuild()
-                MemberIndex.optimize()
                 flash('Records imported.')
             else:
                 flash('There was an error importing the records.')
