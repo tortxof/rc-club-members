@@ -361,8 +361,8 @@ def send_email():
         elif 'send-custom' in request.form:
             members = json.loads(request.form.get('custom-list'))
         elif 'send-test' in request.form:
-            members = [{'first': request.form.get('test-first'),
-                        'last': request.form.get('test-last'),
+            members = [{'first_name': request.form.get('test-first'),
+                        'last_name': request.form.get('test-last'),
                         'email': request.form.get('test-email')}]
         else:
             flash('Missing form field. Please report this error.')
