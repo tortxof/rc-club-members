@@ -117,8 +117,7 @@ def login():
 
 @app.route('/logout')
 def logout():
-    for i in tuple(session.keys()):
-        session.pop(i, None)
+    session.clear()
     flash('You have been logged out.')
     return redirect(url_for('login'))
 
@@ -352,9 +351,9 @@ def send_email():
             flash('Response from mailgun: {}'.format(mailgun_response.text))
             return redirect(url_for('index'))
         if 'send-current' in request.form:
-            members = Member.current()
+            members = Member.current().dicts()
         elif 'send-previous' in request.form:
-            members = Member.previous()
+            members = Member.previous().dicts()
         elif 'send-custom' in request.form:
             members = json.loads(request.form.get('custom-list'))
         elif 'send-test' in request.form:
@@ -369,7 +368,10 @@ def send_email():
             if member.get('email'):
                 recipient_variables[member.get('email')] = {}
                 recipient_variables[member.get('email')]['name'] = \
-                    '{0} {1}'.format(member.get('first'), member.get('last'))
+                    '{0} {1}'.format(
+                        member.get('first_name'),
+                        member.get('last_name')
+                        )
                 recipient_variables[member.get('email')]['id'] = \
                     member.get('id')
         email_data = {

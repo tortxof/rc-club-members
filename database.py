@@ -13,6 +13,12 @@ def mk_id():
 
 database = SqliteDatabase('/data/data.db')
 
+class CharNullField(CharField):
+    def db_value(self, value):
+        if not value:
+            return None
+        return value
+
 class BaseModel(Model):
     class Meta():
         database = database
@@ -31,7 +37,7 @@ class Member(BaseModel):
     city = CharField()
     state = CharField()
     zip_code = CharField()
-    email = CharField(unique=True, null=True)
+    email = CharNullField(unique=True, null=True)
     expire = DateField()
 
     class Meta:
