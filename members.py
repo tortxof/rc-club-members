@@ -313,8 +313,10 @@ def json_import():
         json_data = request.form['json_data']
         records = json.loads(json_data).get('members')
         with database.atomic():
-            member_ids = Member.insert_many(records).execute()
-        flash('{} records imported.'.format(len(member_ids)))
+            if Member.insert_many(records).execute():
+                flash('Records imported.')
+            else:
+                flash('There was an error importing the records.')
         return redirect(url_for('index'))
     else:
         return render_template('import.html')
