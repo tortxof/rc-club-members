@@ -235,11 +235,9 @@ def list_members(args):
         records = Member.select().dicts()
 
     if 'email' in args:
-        emails = ''
-        for record in records:
-            email = record.get('email')
-            if email:
-                emails += email + '\n'
+        emails = '\n'.join(
+            record.get('email') for record in records if record.get('email')
+            ) + '\n'
         flash('{} records found.'.format(len(records)))
         return render_template('text.html', content=emails)
     elif 'csv' in args:
