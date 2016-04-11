@@ -34,6 +34,9 @@ class Member(BaseModel):
     email = CharField(unique=True, null=True)
     expire = DateField()
 
+    class Meta:
+        order_by = ('-expire', 'last_name', 'first_name')
+
     def expired():
         """Members where expire date is in the past."""
         today = datetime.date.today()
