@@ -18,7 +18,7 @@ from itsdangerous import URLSafeSerializer
 from werkzeug.security import generate_password_hash, check_password_hash
 import misaka
 
-from database import database, User, Member
+from database import database, User, Member, IntegrityError
 
 database.connect()
 database.create_tables([User, Member], safe=True)
@@ -150,7 +150,11 @@ def search():
 @login_required
 def add():
     if request.method == 'POST':
-        member = Member.create(**request.form.to_dict())
+        try:
+            member = Member.create(**request.form.to_dict())
+        except IntegrityError:
+            flash('Could not add record. Email address already exists.')
+            return redirect(url_for('index'))
         flash('Record added.')
         return render_template('records.html', records=[member])
     else:
@@ -167,12 +171,16 @@ def get_member(member_id):
 @login_required
 def edit():
     if request.method == 'POST':
-        num_updated = Member.update(
-            **request.form.to_dict()
-            ).where(
-            Member.id == request.form['id']
-            ).execute()
-        flash('{0} record updated.'.format(num_updated))
+        try:
+            Member.update(
+                **request.form.to_dict()
+                ).where(
+                Member.id == request.form['id']
+                ).execute()
+        except IntegrityError:
+            flash('Could not update record. Email address already exists.')
+            return redirect(url_for('index'))
+        flash('Record updated.')
         return render_template(
             'records.html',
             records=[Member.get(Member.id == request.form['id'])]
