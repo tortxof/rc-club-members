@@ -251,6 +251,13 @@ def list_members(args):
         flash('{} records found.'.format(len(records)))
         return render_template('text.html', content=csv_data.getvalue())
     elif 'xlsx' in args:
+        records = [
+            dict(
+                record,
+                expire=str(record.get('expire'))
+                )
+            for record in records
+            ]
         col_names = [
             ('first_name', 'First'), ('last_name', 'Last'),
             ('ama', 'AMA'), ('phone', 'Phone'), ('address', 'Address'),
