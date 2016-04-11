@@ -125,13 +125,17 @@ def logout():
 @login_required
 def new_user():
     if request.method == 'POST':
-        User.create(
-            username = request.form['appuser'],
-            password = generate_password_hash(
-                request.form['password'],
-                method='pbkdf2:sha256'
+        try:
+            User.create(
+                username = request.form['appuser'],
+                password = generate_password_hash(
+                    request.form['password'],
+                    method='pbkdf2:sha256'
+                    )
                 )
-            )
+        except IntegrityError:
+            flash('That username is already taken.')
+            return redirect(url_for('new_user'))
         flash('New user created.')
         return redirect(url_for('index'))
     else:
