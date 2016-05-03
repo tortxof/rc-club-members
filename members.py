@@ -64,6 +64,35 @@ def gen_ro_token():
         }
     return s.dumps(data)
 
+def send_login_email(email):
+    ro_url = '{0}/ro/{1}'.format(app.config.get('APP_URL'), gen_ro_token())
+    email_subject = 'BSRCC Roster Access Link'
+    email_body = '<a href="{0}">Click here to access the roster.</a>'
+    email_body = email_body.format(ro_url)
+
+    email_data = {
+        'from': '{0} <{1}@{2}>'.format(
+            'BSRCC Roster',
+            'roster',
+            app.config.get('MAILGUN_DOMAIN')
+            ),
+        'to': email,
+        'subject': email_subject,
+        'html': render_template(
+            'email_layout.html',
+            body=Markup(email_body),
+            subject=email_subject
+            ),
+        }
+
+    mailgun_response = requests.post(
+        'https://api.mailgun.net/v3/{}/messages'.format(
+            app.config.get('MAILGUN_DOMAIN')
+            ),
+        auth = ('api', app.config.get('MAILGUN_KEY')),
+        data = email_data
+        )
+
 def login_required(f):
     @wraps(f)
     def wrapper(*args, **kwargs):
@@ -418,7 +447,7 @@ def send_email():
             email_data_json=s.dumps(email_data)
             )
     else:
-        ro_url = app.config.get('APP_URL') + '/ro/' + gen_ro_token()
+        ro_url = '{0}/ro/{1}'.format(app.config.get('APP_URL'), gen_ro_token())
         return render_template(
             'send_email.html', month=datetime.date.today().strftime('%B'),
             domain=app.config.get('MAILGUN_DOMAIN'),
@@ -450,6 +479,20 @@ def ro_auth(slug):
     else:
         flash('Authorization failed.')
         return redirect(url_for('index'))
+
+@app.route('/email-login', methods=['POST'])
+def email_login():
+    email = request.form.get('email')
+    if len(email) >= 3:
+        try:
+            member = Member.get(Member.email == email.casefold())
+            send_login_email(member.email)
+            flash('Login email has been sent. Please check your email.')
+        except Member.DoesNotExist:
+            flash('Email address not found.')
+    else:
+        flash('Invalid email address.')
+    return redirect(url_for('login'))
 
 @app.route('/about')
 def about():

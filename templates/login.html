@@ -1,13 +1,34 @@
 {% extends 'layout.html' %}
 {% block body %}
 <div class="panel panel-default">
+  <div class="panel-heading">Member Login</div>
+  <div class="panel-body">
+    <p>
+      If you are a club member, enter your email address. You will receive a
+      link in your email that will allow access to the roster.
+    </p>
+    <form class="form-inline" name="email-login" action="/email-login" method="post">
+
+      <div class="form-group">
+        <label>Email</label>
+        <input class="form-control" type="email" name="email" autofocus>
+      </div>
+
+      <button class="btn btn-default" type="submit">Send me the link.</button>
+
+    </form>
+  </div>
+</div>
+
+<div class="panel panel-default">
+  <div class="panel-heading">Admin Login</div>
   <div class="panel-body">
 
     <form class="form-inline" role="form" name="login" action="/login" method="post">
 
       <div class="form-group">
         <label>Username</label>
-        <input class="form-control" type="text" name="appuser" autofocus>
+        <input class="form-control" type="text" name="appuser">
       </div>
 
       <div class="form-group">
