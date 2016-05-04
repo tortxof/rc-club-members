@@ -144,14 +144,18 @@ def setup():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        user = User.get(User.username == request.form['appuser'])
+        try:
+            user = User.get(User.username == request.form['appuser'])
+        except User.DoesNotExist:
+            flash('Incorrect username or password.')
+            return redirect(url_for('login'))
         if check_password_hash(user.password, request.form['password']):
             session['appuser'] = user.username
             session.permanent = True
             flash('You are now logged in.')
             return redirect(url_for('index'))
         else:
-            flash('Incorrect user name or password.')
+            flash('Incorrect username or password.')
             return redirect(url_for('login'))
     else:
         return render_template('login.html')
