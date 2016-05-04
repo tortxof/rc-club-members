@@ -96,9 +96,19 @@ def send_login_email(email):
 def login_required(f):
     @wraps(f)
     def wrapper(*args, **kwargs):
-        if (('appuser' in session) or
-            (('readonly' in session) and (request.method == 'GET'))
-            ):
+        if session.get('appuser'):
+            return f(*args, **kwargs)
+        else:
+            flash('You are not logged in.')
+            return redirect(url_for('login'))
+    return wrapper
+
+def ro_required(f):
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        if session.get('readonly') and request.method == 'GET':
+            return f(*args, **kwargs)
+        elif session.get('appuser'):
             return f(*args, **kwargs)
         else:
             flash('You are not logged in.')
@@ -106,7 +116,7 @@ def login_required(f):
     return wrapper
 
 @app.route('/')
-@login_required
+@ro_required
 def index():
     records = Member.active()
     return render_template('records_table.html', records=records)
@@ -174,7 +184,7 @@ def new_user():
         return render_template('new_user.html')
 
 @app.route('/search')
-@login_required
+@ro_required
 def search():
     records = MemberIndex.search(request.args.get('query'))
     flash('{} records found.'.format(len(records)))
@@ -197,7 +207,7 @@ def add():
         return render_template('add.html', expire=end_of_year)
 
 @app.route('/member/<member_id>')
-@login_required
+@ro_required
 def get_member(member_id):
     member = Member.get(Member.id == member_id)
     return render_template('records.html', records=[member])
@@ -253,7 +263,7 @@ def delete():
 
 @app.route('/all', defaults={'args': ''})
 @app.route('/all/<path:args>')
-@login_required
+@ro_required
 def list_members(args):
     args = args.split('/')
 
@@ -333,7 +343,7 @@ def list_members(args):
 
 
 @app.route('/export')
-@login_required
+@ro_required
 def json_export():
     return jsonify(members=[
         dict(member, expire=str(member['expire'])) for member in
@@ -357,7 +367,7 @@ def json_import():
         return render_template('import.html')
 
 @app.route('/verify')
-@login_required
+@ro_required
 def verify():
     record = Member.get(Member.id == request.args.get('id'))
     ama_url = 'https://www.modelaircraft.org/MembershipQuery.aspx'
@@ -457,10 +467,7 @@ def send_email():
 @app.route('/get-ro-token')
 @login_required
 def get_ro_token():
-    if 'appuser' in session:
-        return render_template('get_ro_token.html', slug=gen_ro_token())
-    else:
-        return redirect(url_for('index'))
+    return render_template('get_ro_token.html', slug=gen_ro_token())
 
 @app.route('/ro/<slug>')
 def ro_auth(slug):
