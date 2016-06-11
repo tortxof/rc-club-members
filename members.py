@@ -126,7 +126,7 @@ def setup():
     if User.select().count() == 0:
         if request.method == 'POST':
             User.create(
-                username = request.form['appuser'],
+                username = request.form['appuser'].strip(),
                 password = generate_password_hash(
                     request.form['password'],
                     method='pbkdf2:sha256'
@@ -172,7 +172,7 @@ def new_user():
     if request.method == 'POST':
         try:
             User.create(
-                username = request.form['appuser'],
+                username = request.form['appuser'].strip(),
                 password = generate_password_hash(
                     request.form['password'],
                     method='pbkdf2:sha256'
@@ -198,8 +198,10 @@ def search():
 @login_required
 def add():
     if request.method == 'POST':
+        form_data = {k: v.strip() for k, v in request.form.items()}
+        form_data['email'] = form_data.get('email').casefold()
         try:
-            member = Member.create(**request.form.to_dict())
+            member = Member.create(**form_data)
         except IntegrityError:
             flash('Could not add record. Email address already exists.')
             return redirect(url_for('index'))
@@ -220,9 +222,11 @@ def get_member(member_id):
 @login_required
 def edit():
     if request.method == 'POST':
+        form_data = {k: v.strip() for k, v in request.form.items()}
+        form_data['email'] = form_data.get('email').casefold()
         try:
             Member.update(
-                **request.form.to_dict()
+                **form_data
                 ).where(
                 Member.id == request.form['id']
                 ).execute()
