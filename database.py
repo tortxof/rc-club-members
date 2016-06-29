@@ -7,6 +7,8 @@ from peewee import (
     IntegrityError
     )
 from playhouse.sqlite_ext import SqliteExtDatabase, FTSModel, SearchField
+from playhouse.reflection import Introspector
+from playhouse.migrate import migrate, SqliteMigrator
 
 def mk_id():
     """Generate a random unique id."""
@@ -44,6 +46,7 @@ class Member(BaseModel):
     zip_code = CharField()
     email = CharNullField(unique=True, null=True)
     expire = DateField()
+    dob = DateField(default='')
 
     class Meta:
         order_by = ('-expire', 'last_name', 'first_name')
@@ -74,6 +77,25 @@ class Member(BaseModel):
         else:
             return Member.current()
 
+    def migrate():
+        migrator = SqliteMigrator(database)
+        introspector = Introspector.from_database(database)
+        try:
+            member_model = introspector.generate_models()['member']
+        except KeyError:
+            pass
+        else:
+            member_fields = member_model._meta.fields.keys()
+            if 'dob' not in member_fields:
+                with database.transaction():
+                    migrate(
+                        migrator.add_column(
+                            'member',
+                            'dob',
+                            DateField(default='')
+                        )
+                    )
+
 class MemberIndex(BaseFTSModel):
     id = SearchField()
     first_name = SearchField()
@@ -86,6 +108,7 @@ class MemberIndex(BaseFTSModel):
     zip_code = SearchField()
     email = SearchField()
     expire = SearchField()
+    dob = SearchField()
 
     class Meta:
         extension_options = {'content': Member}

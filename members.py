@@ -20,6 +20,8 @@ import misaka
 
 from database import database, User, Member, MemberIndex, IntegrityError
 
+Member.migrate()
+
 database.connect()
 database.drop_tables([MemberIndex], safe=True)
 database.create_tables([User, Member, MemberIndex], safe=True)
