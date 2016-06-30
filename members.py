@@ -296,7 +296,8 @@ def list_members(args):
         return render_template('text.html', content=emails)
     elif 'csv' in args:
         csv_data = io.StringIO()
-        writer = csv.DictWriter(csv_data, fieldnames=Member._meta.fields)
+        writer = csv.DictWriter(csv_data,
+                                fieldnames=Member._meta.sorted_field_names)
         writer.writeheader()
         for record in records:
             writer.writerow(record)
