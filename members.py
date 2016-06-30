@@ -307,7 +307,8 @@ def list_members(args):
         records = [
             dict(
                 record,
-                expire=str(record.get('expire'))
+                expire=str(record.get('expire')),
+                dob=str(record.get('dob')),
                 )
             for record in records
             ]
@@ -315,7 +316,8 @@ def list_members(args):
             ('first_name', 'First'), ('last_name', 'Last'),
             ('ama', 'AMA'), ('phone', 'Phone'), ('address', 'Address'),
             ('city', 'City'), ('state', 'State'), ('zip_code', 'ZIP'),
-            ('email', 'E-mail'), ('expire', 'Expiration')
+            ('email', 'E-mail'), ('expire', 'Expiration'),
+            ('dob', 'Date of Birth'),
             ]
         xlsx_data = io.BytesIO()
         workbook = xlsxwriter.Workbook(xlsx_data)
