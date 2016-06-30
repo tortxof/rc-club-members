@@ -9,79 +9,79 @@
       <input type="hidden" name="id" value="{{ record.id }}">
 
       <div class="form-group">
-        <label class="col-sm-3 control-label">First</label>
-        <div class="col-sm-9">
+        <label class="col-md-3 control-label">First</label>
+        <div class="col-md-9">
           <input class="form-control" type="text" name="first_name" value="{{ record.first_name }}">
         </div>
       </div>
 
       <div class="form-group">
-        <label class="col-sm-3 control-label">Last</label>
-        <div class="col-sm-9">
+        <label class="col-md-3 control-label">Last</label>
+        <div class="col-md-9">
           <input class="form-control" type="text" name="last_name" value="{{ record.last_name }}">
         </div>
       </div>
 
       <div class="form-group">
-        <label class="col-sm-3 control-label">AMA</label>
-        <div class="col-sm-9">
+        <label class="col-md-3 control-label">AMA</label>
+        <div class="col-md-9">
           <input class="form-control" type="text" name="ama" value="{{ record.ama }}">
         </div>
       </div>
 
       <div class="form-group">
-        <label class="col-sm-3 control-label">Phone</label>
-        <div class="col-sm-9">
+        <label class="col-md-3 control-label">Phone</label>
+        <div class="col-md-9">
           <input class="form-control" type="text" name="phone" value="{{ record.phone }}">
         </div>
       </div>
 
       <div class="form-group">
-        <label class="col-sm-3 control-label">Address</label>
-        <div class="col-sm-9">
+        <label class="col-md-3 control-label">Address</label>
+        <div class="col-md-9">
           <input class="form-control" type="text" name="address" value="{{ record.address }}">
         </div>
       </div>
 
       <div class="form-group">
-        <label class="col-sm-3 control-label">City</label>
-        <div class="col-sm-9">
+        <label class="col-md-3 control-label">City</label>
+        <div class="col-md-9">
           <input class="form-control" type="text" name="city" value="{{ record.city }}">
         </div>
       </div>
 
       <div class="form-group">
-        <label class="col-sm-3 control-label">State</label>
-        <div class="col-sm-9">
+        <label class="col-md-3 control-label">State</label>
+        <div class="col-md-9">
           <input class="form-control" type="text" name="state" value="{{ record.state }}">
         </div>
       </div>
 
       <div class="form-group">
-        <label class="col-sm-3 control-label">Zip</label>
-        <div class="col-sm-9">
+        <label class="col-md-3 control-label">Zip</label>
+        <div class="col-md-9">
           <input class="form-control" type="text" name="zip_code" value="{{ record.zip_code }}">
         </div>
       </div>
 
       <div class="form-group">
-        <label class="col-sm-3 control-label">Email</label>
-        <div class="col-sm-9">
+        <label class="col-md-3 control-label">Email</label>
+        <div class="col-md-9">
           <input class="form-control" type="email" name="email" value="{% if record.email %}{{ record.email }}{% endif %}">
         </div>
       </div>
 
       <div class="form-group">
-        <label class="col-sm-3 control-label">Date of Birth</label>
-        <div class="col-sm-9">
-          <input class="form-control" type="text" name="dob" value="{{ record.dob }}">
+        <label class="col-md-3 control-label">Date of Birth (YYYY-MM-DD)</label>
+        <div class="col-md-9">
+          <input class="form-control" type="text" pattern="^\d{4}-\d{2}-\d{2}$" name="dob" value="{{ record.dob }}">
         </div>
       </div>
 
       <div class="form-group">
-        <label class="col-sm-3 control-label">Expire</label>
-        <div class="col-sm-9">
-          <input class="form-control" type="text" id="expire" name="expire" value="{{ record.expire }}">
+        <label class="col-md-3 control-label">Expire (YYYY-MM-DD)</label>
+        <div class="col-md-9">
+          <input class="form-control" type="text" pattern="^\d{4}-\d{2}-\d{2}$" id="expire" name="expire" value="{{ record.expire }}">
         </div>
       </div>
 
