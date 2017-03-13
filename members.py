@@ -24,9 +24,8 @@ database.connect()
 database.drop_tables([MemberIndex], safe=True)
 database.create_tables([User, Member, MemberIndex], safe=True)
 MemberIndex.rebuild()
-database.close()
-
 Member.migrate()
+database.close()
 
 app = Flask(__name__)
 
