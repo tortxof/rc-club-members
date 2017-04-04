@@ -437,8 +437,8 @@ def send_email():
                 recipient_variables[member.get('email')] = {}
                 recipient_variables[member.get('email')]['name'] = \
                     '{0} {1}'.format(
-                        member.get('first_name'),
-                        member.get('last_name')
+                        member.get('first_name', 'Hello'),
+                        member.get('last_name', '')
                         )
                 recipient_variables[member.get('email')]['id'] = \
                     member.get('id')
