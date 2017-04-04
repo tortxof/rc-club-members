@@ -439,7 +439,7 @@ def send_email():
                     '{0} {1}'.format(
                         member.get('first_name', 'Hello'),
                         member.get('last_name', '')
-                        )
+                        ).strip()
                 recipient_variables[member.get('email')]['id'] = \
                     member.get('id')
         email_data = {
