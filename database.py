@@ -14,7 +14,12 @@ def mk_id():
     """Generate a random unique id."""
     return base64.urlsafe_b64encode(os.urandom(15)).decode()
 
-database = SqliteExtDatabase('/data/data.db')
+database = PostgresqlExtDatabase(
+    os.environ.get('PG_NAME'),
+    host = os.environ.get('PG_HOST'),
+    user = os.environ.get('PG_USER'),
+    password = os.environ.get('PG_PASSWORD'),
+)
 
 class CharNullField(CharField):
     def db_value(self, value):
