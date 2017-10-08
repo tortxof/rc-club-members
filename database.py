@@ -6,9 +6,7 @@ from peewee import (
     Model, ForeignKeyField, CharField, DateField,
     IntegrityError
     )
-from playhouse.sqlite_ext import SqliteExtDatabase, FTSModel, SearchField
-from playhouse.reflection import Introspector
-from playhouse.migrate import migrate, SqliteMigrator
+from playhouse.postgres_ext import PostgresqlExtDatabase, Match
 
 def mk_id():
     """Generate a random unique id."""
