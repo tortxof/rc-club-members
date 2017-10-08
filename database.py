@@ -27,11 +27,14 @@ class CharNullField(CharField):
         return value
 
 class DateNullField(DateField):
-    def coerce(self, value):
+    def db_value(self, value):
         if not value:
             return None
-        else:
-            return value
+        return value
+    def python_value(self, value):
+        if not value:
+            return ''
+        return value
 
 class BaseModel(Model):
     class Meta():
