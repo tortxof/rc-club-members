@@ -188,7 +188,9 @@ def new_user():
 @app.route('/search')
 @ro_required
 def search():
-    records = MemberIndex.search(request.args.get('query'))
+    records = Member.select().where(
+        Match(Member.first_name, request.args.get('query'))
+    )
     flash('{} records found.'.format(len(records)))
     return render_template('records.html', records=records)
 
