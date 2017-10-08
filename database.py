@@ -86,39 +86,3 @@ class Member(BaseModel):
             return Member.previous()
         else:
             return Member.current()
-
-    def migrate():
-        migrator = SqliteMigrator(database)
-        introspector = Introspector.from_database(database)
-        try:
-            member_model = introspector.generate_models()['member']
-        except KeyError:
-            pass
-        else:
-            member_fields = member_model._meta.fields.keys()
-            if 'dob' not in member_fields:
-                with database.transaction():
-                    migrate(
-                        migrator.add_column(
-                            'member',
-                            'dob',
-                            DateField(default='')
-                        )
-                    )
-
-class MemberIndex(BaseFTSModel):
-    id = SearchField()
-    first_name = SearchField()
-    last_name = SearchField()
-    ama = SearchField()
-    phone = SearchField()
-    address = SearchField()
-    city = SearchField()
-    state = SearchField()
-    zip_code = SearchField()
-    email = SearchField()
-    expire = SearchField()
-    dob = SearchField()
-
-    class Meta:
-        extension_options = {'content': Member}
