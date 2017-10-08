@@ -29,8 +29,14 @@ class CharNullField(CharField):
 class BaseModel(Model):
     class Meta():
         database = database
+class DateNullField(DateField):
+    def coerce(self, value):
+        if not value:
+            return None
+        else:
+            return value
 
-class BaseFTSModel(FTSModel):
+class BaseModel(Model):
     class Meta():
         database = database
 
@@ -50,7 +56,7 @@ class Member(BaseModel):
     zip_code = CharField()
     email = CharNullField(unique=True, null=True)
     expire = DateField()
-    dob = DateField(default='')
+    dob = DateNullField(default=None, null=True)
 
     class Meta:
         order_by = ('-expire', 'last_name', 'first_name')
