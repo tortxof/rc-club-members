@@ -18,13 +18,10 @@ from itsdangerous import URLSafeSerializer
 from werkzeug.security import generate_password_hash, check_password_hash
 import misaka
 
-from database import database, User, Member, MemberIndex, IntegrityError
+from database import database, User, Member, IntegrityError, Match
 
 database.connect()
-database.drop_tables([MemberIndex], safe=True)
-database.create_tables([User, Member, MemberIndex], safe=True)
-MemberIndex.rebuild()
-Member.migrate()
+database.create_tables([User, Member], safe=True)
 database.close()
 
 app = Flask(__name__)
