@@ -205,7 +205,6 @@ def add():
         except IntegrityError:
             flash('Could not add record. Email address already exists.')
             return redirect(url_for('index'))
-        MemberIndex.rebuild()
         flash('Record added.')
         return render_template('records.html', records=[member])
     else:
@@ -233,7 +232,6 @@ def edit():
         except IntegrityError:
             flash('Could not update record. Email address already exists.')
             return redirect(url_for('index'))
-        MemberIndex.rebuild()
         flash('Record updated.')
         return render_template(
             'records.html',
@@ -255,7 +253,6 @@ def delete():
         member_id = request.form['id']
         member = Member.get(Member.id == member_id)
         member.delete_instance(recursive=True)
-        MemberIndex.rebuild()
         flash('Record deleted.')
         return render_template('records.html', records=[member])
     else:
@@ -369,7 +366,6 @@ def json_import():
         records = json.loads(json_data).get('members')
         with database.atomic():
             if Member.insert_many(records).execute():
-                MemberIndex.rebuild()
                 flash('Records imported.')
             else:
                 flash('There was an error importing the records.')
