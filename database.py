@@ -26,9 +26,6 @@ class CharNullField(CharField):
             return None
         return value
 
-class BaseModel(Model):
-    class Meta():
-        database = database
 class DateNullField(DateField):
     def coerce(self, value):
         if not value:
