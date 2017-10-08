@@ -9,7 +9,7 @@
 
   <title>RC Club Members{% if session['appuser'] %} - {{ session['appuser'] }}{% endif %}</title>
 
-  <link href="/static/components/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
 
   <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
   <!--[if lt IE 9]>
@@ -115,8 +115,8 @@
     {% block body %}{% endblock %}
   </div><!-- /.container -->
 
-  <script src="/static/components/jquery/dist/jquery.min.js"></script>
-  <script src="/static/components/bootstrap/dist/js/bootstrap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
   <script src="/static/js/app.js"></script>
   {% if config.GA_ID %}
     <script>
