@@ -15,10 +15,11 @@ def mk_id():
     return base64.urlsafe_b64encode(os.urandom(15)).decode()
 
 database = PostgresqlExtDatabase(
-    os.environ.get('PG_NAME'),
-    host = os.environ.get('PG_HOST'),
-    user = os.environ.get('PG_USER'),
-    password = os.environ.get('PG_PASSWORD'),
+    os.environ.get('PG_NAME', 'members'),
+    host = os.environ.get('PG_HOST', 'localhost'),
+    user = os.environ.get('PG_USER', 'postgres'),
+    password = os.environ.get('PG_PASSWORD', 'postgres'),
+    register_hstore = False,
 )
 
 class CharNullField(CharField):
