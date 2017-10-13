@@ -18,7 +18,7 @@ from itsdangerous import URLSafeSerializer
 from werkzeug.security import generate_password_hash, check_password_hash
 import misaka
 
-from database import database, User, Member, IntegrityError, Match
+from database import database, User, Member, IntegrityError, ProgrammingError
 
 database.connect()
 database.create_tables([User, Member], safe=True)
@@ -188,9 +188,14 @@ def new_user():
 @app.route('/search')
 @ro_required
 def search():
-    records = Member.select().where(
-        Match(Member.first_name, request.args.get('query'))
-    )
+    try:
+        records = list(Member.raw(
+            'select * from member where search_content @@ %s',
+            request.args.get('query')
+        ))
+    except ProgrammingError:
+        flash('There was an error in your search query.')
+        return redirect(url_for('index'))
     flash('{} records found.'.format(len(records)))
     return render_template('records.html', records=records)
 
@@ -205,6 +210,7 @@ def add():
         except IntegrityError:
             flash('Could not add record. Email address already exists.')
             return redirect(url_for('index'))
+        member.update_search_content()
         flash('Record added.')
         return render_template('records.html', records=[member])
     else:
@@ -232,6 +238,7 @@ def edit():
         except IntegrityError:
             flash('Could not update record. Email address already exists.')
             return redirect(url_for('index'))
+        Member.get(Member.id == request.form['id']).update_search_content()
         flash('Record updated.')
         return render_template(
             'records.html',
@@ -366,6 +373,8 @@ def json_import():
         records = json.loads(json_data).get('members')
         with database.atomic():
             if Member.insert_many(records).execute():
+                for member in Member.select():
+                    member.update_search_content()
                 flash('Records imported.')
             else:
                 flash('There was an error importing the records.')

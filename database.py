@@ -3,10 +3,10 @@ import base64
 import datetime
 
 from peewee import (
-    Model, ForeignKeyField, CharField, DateField,
-    IntegrityError
+    fn, Model, ForeignKeyField, CharField, DateField,
+    IntegrityError, ProgrammingError
     )
-from playhouse.postgres_ext import PostgresqlExtDatabase, Match
+from playhouse.postgres_ext import PostgresqlExtDatabase, TSVectorField
 
 def mk_id():
     """Generate a random unique id."""
@@ -57,6 +57,7 @@ class Member(BaseModel):
     email = CharNullField(unique=True, null=True)
     expire = DateField()
     dob = DateNullField(default=None, null=True)
+    search_content = TSVectorField(default='')
 
     class Meta:
         order_by = ('-expire', 'last_name', 'first_name')
@@ -86,3 +87,20 @@ class Member(BaseModel):
             return Member.previous()
         else:
             return Member.current()
+
+    def update_search_content(self):
+        search_content = ' '.join([
+            str(getattr(self, field)) for field in
+            (
+                'first_name',
+                'last_name',
+                'ama',
+                'address',
+                'city',
+                'state',
+                'zip_code',
+                'email',
+            )
+        ])
+        self.search_content = fn.to_tsvector('simple', search_content)
+        self.save()
