@@ -20,7 +20,7 @@ import misaka
 
 from database import database, User, Member, IntegrityError, ProgrammingError
 
-database.connect()
+database.get_conn()
 database.create_tables([User, Member], safe=True)
 database.close()
 
@@ -46,7 +46,7 @@ app.config['PERMANENT_SESSION_LIFETIME'] = 7257600
 @app.before_request
 def before_request():
     g.database = database
-    g.database.connect()
+    g.database.get_conn()
 
 @app.after_request
 def after_request(request):
