@@ -473,7 +473,7 @@ def send_email():
             email_data_json=s.dumps(email_data)
             )
     else:
-        ro_url = '{0}/ro/{1}'.format(app.config.get('APP_URL'), gen_ro_token())
+        ro_url = '{0}{1}'.format(app.config.get('APP_URL'), url_for('ro_auth', slug=gen_ro_token()))
         return render_template(
             'send_email.html', month=datetime.date.today().strftime('%B'),
             domain=app.config.get('MAILGUN_DOMAIN'),
