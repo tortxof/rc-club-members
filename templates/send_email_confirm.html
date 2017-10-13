@@ -14,7 +14,7 @@
   <div class="panel-body">{{ email_body }}</div>
 </div>
 
-<form action="/send" method="post">
+<form action="{{url_for('send_email')}}" method="post">
   <input type="hidden" name="email_data" value="{{ email_data_json }}">
   <button class="btn btn-default" type="submit" name="confirm-send">Send</button>
 </form>

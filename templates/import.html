@@ -3,7 +3,7 @@
 <div class="panel panel-default">
   <div class="panel-body">
 
-    <form role="form" name="import" action="/import" method="post">
+    <form role="form" name="import" action="{{url_for('json_import')}}" method="post">
 
       <div class="form-group">
         <textarea class="form-control" name="json_data"></textarea>

@@ -1,4 +1,4 @@
 {% extends 'layout.html' %}
 {% block body %}
-<a href="/ro/{{ slug }}">/ro/{{ slug }}</a>
+<a href="{{url_for('ro_auth', slug=slug)}}">{{url_for('ro_auth', slug=slug)}}</a>
 {% endblock %}

@@ -29,51 +29,51 @@
           <span class="icon-bar"></span>
           <span class="icon-bar"></span>
         </button>
-        <a class="navbar-brand" href="/">RC Club Members</a>
+        <a class="navbar-brand" href="{{url_for('index')}}">RC Club Members</a>
       </div>
       <div id="navbar" class="collapse navbar-collapse">
         <ul class="nav navbar-nav">
-          <li><a href="/all/active">Active</a></li>
+          <li><a href="{{url_for('list_members')}}/active">Active</a></li>
           {% if session['appuser'] %}
-          <li><a href="/add">Add</a></li>
-          <li><a href="/all">All</a></li>
-          <li><a href="/all/current">Current</a></li>
-          <li><a href="/all/previous">Previous Year</a></li>
-          <li><a href="/all/expired">Expired</a></li>
+          <li><a href="{{url_for('add')}}">Add</a></li>
+          <li><a href="{{url_for('list_members')}}">All</a></li>
+          <li><a href="{{url_for('list_members')}}/current">Current</a></li>
+          <li><a href="{{url_for('list_members')}}/previous">Previous Year</a></li>
+          <li><a href="{{url_for('list_members')}}/expired">Expired</a></li>
           {% endif %}
           <li class="dropdown">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">CSV <span class="caret"></span></a>
             <ul class="dropdown-menu">
-              <li><a href="/all/active/csv">Active</a></li>
+              <li><a href="{{url_for('list_members')}}/active/csv">Active</a></li>
               {% if session['appuser'] %}
-              <li><a href="/all/csv">All</a></li>
-              <li><a href="/all/current/csv">Current</a></li>
-              <li><a href="/all/previous/csv">Previous Year</a></li>
-              <li><a href="/all/expired/csv">Expired</a></li>
+              <li><a href="{{url_for('list_members')}}/csv">All</a></li>
+              <li><a href="{{url_for('list_members')}}/current/csv">Current</a></li>
+              <li><a href="{{url_for('list_members')}}/previous/csv">Previous Year</a></li>
+              <li><a href="{{url_for('list_members')}}/expired/csv">Expired</a></li>
               {% endif %}
             </ul>
           </li>
           <li class="dropdown">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">XLSX <span class="caret"></span></a>
             <ul class="dropdown-menu">
-              <li><a href="/all/active/xlsx">Active</a></li>
+              <li><a href="{{url_for('list_members')}}/active/xlsx">Active</a></li>
               {% if session['appuser'] %}
-              <li><a href="/all/xlsx">All</a></li>
-              <li><a href="/all/current/xlsx">Current</a></li>
-              <li><a href="/all/previous/xlsx">Previous Year</a></li>
-              <li><a href="/all/expired/xlsx">Expired</a></li>
+              <li><a href="{{url_for('list_members')}}/xlsx">All</a></li>
+              <li><a href="{{url_for('list_members')}}/current/xlsx">Current</a></li>
+              <li><a href="{{url_for('list_members')}}/previous/xlsx">Previous Year</a></li>
+              <li><a href="{{url_for('list_members')}}/expired/xlsx">Expired</a></li>
               {% endif %}
             </ul>
           </li>
           <li class="dropdown">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><span class="glyphicon glyphicon-envelope" aria-hidden="true"></span> <span class="caret"></span></a>
             <ul class="dropdown-menu">
-              <li><a href="/all/active/email">Active</a></li>
+              <li><a href="{{url_for('list_members')}}/active/email">Active</a></li>
               {% if session['appuser'] %}
-              <li><a href="/all/email">All</a></li>
-              <li><a href="/all/current/email">Current</a></li>
-              <li><a href="/all/previous/email">Previous Year</a></li>
-              <li><a href="/all/expired/email">Expired</a></li>
+              <li><a href="{{url_for('list_members')}}/email">All</a></li>
+              <li><a href="{{url_for('list_members')}}/current/email">Current</a></li>
+              <li><a href="{{url_for('list_members')}}/previous/email">Previous Year</a></li>
+              <li><a href="{{url_for('list_members')}}/expired/email">Expired</a></li>
               {% endif %}
             </ul>
           </li>
@@ -81,22 +81,22 @@
             <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><span class="glyphicon glyphicon-cog" aria-hidden="true"></span> <span class="caret"></span></a>
             <ul class="dropdown-menu" role="menu">
               {% if session.appuser %}
-              <li><a href="/new-user">New User</a></li>
+              <li><a href="{{url_for('new_user')}}">New User</a></li>
               <li class="divider"></li>
               {% endif %}
               {% if session.appuser %}
-              <li><a href="/import">Import</a></li>
+              <li><a href="{{url_for('json_import')}}">Import</a></li>
               {% endif %}
-              <li><a href="/export">Export</a></li>
+              <li><a href="{{url_for('json_export')}}">Export</a></li>
               <li class="divider"></li>
               {% if session['appuser'] %}
-              <li><a href="/send">Email Current Members</a></li>
+              <li><a href="{{url_for('send_email')}}">Email Current Members</a></li>
               <li class="divider"></li>
-              <li><a href="/get-ro-token">Get read only token</a></li>
-              <li><a href="/logout">Log Out {{ session['appuser'] }}</a></li>
+              <li><a href="{{url_for('get_ro_token')}}">Get read only token</a></li>
+              <li><a href="{{url_for('logout')}}">Log Out {{ session['appuser'] }}</a></li>
               <li class="divider"></li>
               {% endif %}
-              <li><a href="/about">About</a></li>
+              <li><a href="{{url_for('about')}}">About</a></li>
             </ul>
           </li>
         </ul>

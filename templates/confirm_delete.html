@@ -8,7 +8,7 @@
 <div class="panel panel-default">
   <div class="panel-body">
 
-    <form class="form-inline" role="form" name="confirmdelete" action="/delete" method="post">
+    <form class="form-inline" role="form" name="confirmdelete" action="{{url_for('delete')}}" method="post">
 
       <input type="hidden" name="id" value="{{ id }}">
 
