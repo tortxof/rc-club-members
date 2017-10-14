@@ -519,7 +519,7 @@ def email_login():
 
 @app.route('/about')
 def about():
-    with open('.git/refs/heads/master') as f:
+    with open('version') as f:
         version = f.read()
     version = version.strip()[:8]
     return render_template('about.html', version=version)
