@@ -297,11 +297,19 @@ def list_members(args):
         flash('{} records found.'.format(len(records)))
         return render_template('text.html', content=emails)
     elif 'csv' in args:
+        exclude_fields = ('search_content',)
         csv_data = io.StringIO()
-        writer = csv.DictWriter(csv_data,
-                                fieldnames=Member._meta.sorted_field_names)
+        writer = csv.DictWriter(
+            csv_data,
+            fieldnames = list(
+                field for field in Member._meta.sorted_field_names
+                if field not in exclude_fields
+            ),
+        )
         writer.writeheader()
         for record in records:
+            for field in exclude_fields:
+                del record[field]
             writer.writerow(record)
         flash('{} records found.'.format(len(records)))
         return render_template('text.html', content=csv_data.getvalue())
