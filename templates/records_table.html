@@ -18,7 +18,7 @@
     <tr>
       <td><a href="{{url_for('get_member', member_id=record.id)}}">{{ record.first_name }}</a></td>
       <td><a href="{{url_for('get_member', member_id=record.id)}}">{{ record.last_name }}</a></td>
-      <td><a href="{{url_for('verify')}}?id={{ record.id }}">{{ record.ama }}</a></td>
+      <td><a target="_blank" href="{{url_for('verify')}}?id={{ record.id }}">{{ record.ama }}</a></td>
       <td>{% if record.email %}<a href="mailto:{{ record.email }}">{{ record.email }}</a>{% endif %}</td>
       {% set phone_numbers = record.phone.split() %}
       <td>{{ phone_numbers | join('<br>'|safe) }}</td>
