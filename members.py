@@ -33,6 +33,9 @@ app.config['SECRET_KEY'] = base64.urlsafe_b64decode(
         )
     )
 
+app.config['CLUB_SHORT_NAME'] = os.environ.get('CLUB_SHORT_NAME')
+app.config['CLUB_DISPLAY_NAME'] = os.environ.get('CLUB_DISPLAY_NAME')
+
 app.config['GA_ID'] = os.environ.get('GA_ID')
 
 app.config['MAILGUN_DOMAIN'] = os.environ.get('MAILGUN_DOMAIN')
@@ -64,13 +67,13 @@ def gen_ro_token():
 
 def send_login_email(email):
     ro_url = '{0}/ro/{1}'.format(app.config.get('APP_URL'), gen_ro_token())
-    email_subject = 'BSRCC Roster Access Link'
+    email_subject = f"{app.config['CLUB_DISPLAY_NAME']} Roster Access Link"
     email_body = '<a href="{0}">Click here to access the roster.</a>'
     email_body = email_body.format(ro_url)
 
     email_data = {
         'from': '{0} <{1}@{2}>'.format(
-            'BSRCC Roster',
+            f"{app.config['CLUB_DISPLAY_NAME']} Roster",
             'roster',
             app.config.get('MAILGUN_DOMAIN')
             ),
@@ -355,11 +358,13 @@ def list_members(args):
         workbook.close()
         xlsx_data.seek(0)
         return send_file(
-            xlsx_data, as_attachment=True,
-            attachment_filename='bsrcc-roster-{}.xlsx'.format(
-                datetime.date.today().isoformat()
-                )
-            )
+            xlsx_data,
+            as_attachment=True,
+            attachment_filename='{}-roster-{}.xlsx'.format(
+                app.config['CLUB_SHORT_NAME'],
+                datetime.date.today().isoformat(),
+            ),
+        )
     else:
         flash('{} records found.'.format(len(records)))
         return render_template('records_table.html', records=records)
