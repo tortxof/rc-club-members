@@ -1,14 +1,10 @@
-<div class="panel panel-default">
-  <div class="panel-body">
-    <form class="form-inline" role="form" name="search" action="{{url_for('search')}}" method="get">
-      <div class="form-group">
-        <div class="input-group">
-          <input class="form-control" type="text" name="query" autofocus>
-          <span class="input-group-btn">
-            <button type="submit" class="btn btn-default">Search</button>
-          </span>
-        </div>
-      </div>
-    </form>
+<form role="form" name="search" action="{{url_for('search')}}" method="get">
+  <div class="form-group">
+    <div class="input-group">
+      <input class="form-control" type="text" name="query" autofocus>
+      <span class="input-group-btn">
+        <button type="submit" class="btn btn-default">Search</button>
+      </span>
+    </div>
   </div>
-</div>
+</form>
