@@ -46,6 +46,16 @@ app.config['APP_URL'] = os.environ.get('APP_URL')
 
 app.config['PERMANENT_SESSION_LIFETIME'] = 7257600
 
+def normalize_query(input_query):
+    tokens = input_query.split(' ')
+    output_tokens = []
+    for token in tokens:
+        if token.isupper():
+            output_tokens.append(token)
+        else:
+            output_tokens.append(token.lower())
+    return ' '.join(output_tokens)
+
 @app.before_request
 def before_request():
     g.database = database
@@ -194,7 +204,7 @@ def search():
     try:
         records = list(Member.raw(
             'select * from member where search_content @@ %s',
-            request.args.get('query')
+            normalize_query(request.args.get('query'))
         ))
     except ProgrammingError:
         flash('There was an error in your search query.')
