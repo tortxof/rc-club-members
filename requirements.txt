@@ -1,9 +1,0 @@
-uwsgi
-peewee
-psycopg2
-flask
-beautifulsoup4
-requests
-XlsxWriter
-misaka
-zappa
