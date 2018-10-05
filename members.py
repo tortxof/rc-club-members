@@ -445,7 +445,9 @@ def send_email():
                 )
             flash('Response from mailgun: {}'.format(mailgun_response.text))
             return redirect(url_for('index'))
-        if 'send-current' in request.form:
+        if 'send-active' in request.form:
+            members = Member.active().dicts()
+        elif 'send-current' in request.form:
             members = Member.current().dicts()
         elif 'send-previous' in request.form:
             members = Member.previous().dicts()
