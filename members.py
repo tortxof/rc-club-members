@@ -191,9 +191,9 @@ def new_user():
                 username = request.form['appuser'].strip(),
                 password = generate_password_hash(
                     request.form['password'],
-                    method='pbkdf2:sha256'
-                    )
+                    method='pbkdf2:sha256',
                 )
+            )
         except IntegrityError:
             flash('That username is already taken.')
             return redirect(url_for('new_user'))
@@ -209,7 +209,7 @@ def search():
     try:
         records = list(Member.raw(
             'select * from member where search_content @@ %s',
-            normalize_query(request.args.get('query'))
+            normalize_query(request.args.get('query')),
         ))
     except ProgrammingError:
         flash('There was an error in your search query.')
@@ -232,7 +232,10 @@ def add():
         flash('Record added.')
         return render_template('records.html', records=[member])
     else:
-        end_of_year = datetime.date.today().replace(month=12, day=31).isoformat()
+        end_of_year = datetime.date.today().replace(
+            month=12,
+            day=31,
+        ).isoformat()
         return render_template('add.html', expire=end_of_year)
 
 @app.route('/member/<member_id>')
@@ -250,9 +253,9 @@ def edit():
         try:
             Member.update(
                 **form_data
-                ).where(
+            ).where(
                 Member.id == request.form['id']
-                ).execute()
+            ).execute()
         except IntegrityError:
             flash('Could not update record. Email address already exists.')
             return redirect(url_for('index'))
@@ -260,8 +263,8 @@ def edit():
         flash('Record updated.')
         return render_template(
             'records.html',
-            records=[Member.get(Member.id == request.form['id'])]
-            )
+            records=[Member.get(Member.id == request.form['id'])],
+        )
     else:
         member_id = request.args.get('id')
         member = Member.get(Member.id == member_id)
@@ -285,8 +288,11 @@ def delete():
         member = Member.get(Member.id == member_id)
         if member:
             flash('Are you sure you want to delete this record?')
-            return render_template('confirm_delete.html',
-                                   records=[member], id=member_id)
+            return render_template(
+                'confirm_delete.html',
+                records=[member],
+                id=member_id,
+            )
         else:
             flash('Record not found.')
             return redirect(url_for('index'))
@@ -311,7 +317,7 @@ def list_members(args):
     if 'email' in args:
         emails = '\n'.join(
             record.get('email') for record in records if record.get('email')
-            ) + '\n'
+        ) + '\n'
         flash('{} records found.'.format(len(records)))
         return render_template('text.html', content=emails)
     elif 'csv' in args:
@@ -337,16 +343,22 @@ def list_members(args):
                 record,
                 expire=str(record.get('expire')),
                 dob=str(record.get('dob')),
-                )
+            )
             for record in records
-            ]
+        ]
         col_names = [
-            ('first_name', 'First'), ('last_name', 'Last'),
-            ('ama', 'AMA'), ('phone', 'Phone'), ('address', 'Address'),
-            ('city', 'City'), ('state', 'State'), ('zip_code', 'ZIP'),
-            ('email', 'E-mail'), ('expire', 'Expiration'),
+            ('first_name', 'First'),
+            ('last_name', 'Last'),
+            ('ama', 'AMA'),
+            ('phone', 'Phone'),
+            ('address', 'Address'),
+            ('city', 'City'),
+            ('state', 'State'),
+            ('zip_code', 'ZIP'),
+            ('email', 'E-mail'),
+            ('expire', 'Expiration'),
             ('dob', 'Date of Birth'),
-            ]
+        ]
         xlsx_data = io.BytesIO()
         workbook = xlsxwriter.Workbook(xlsx_data)
         worksheet = workbook.add_worksheet('Members')
@@ -361,13 +373,19 @@ def list_members(args):
         for row in range(2, len(records)+1, 2):
             worksheet.set_row(row, None, gray_bg)
         worksheet.merge_range(
-            len(records)+2, 0, len(records)+2, len(col_names)-1,
-            '{} members'.format(len(records))
-            )
+            len(records)+2,
+            0,
+            len(records)+2,
+            len(col_names)-1,
+            '{} members'.format(len(records)),
+        )
         worksheet.merge_range(
-            len(records)+3, 0, len(records)+3, len(col_names)-1,
-            'Generated: {}'.format(datetime.date.today().isoformat())
-            )
+            len(records)+3,
+            0,
+            len(records)+3,
+            len(col_names)-1,
+            'Generated: {}'.format(datetime.date.today().isoformat()),
+        )
         worksheet.print_area(0, 0, len(records)+3, len(col_names)-1)
         worksheet.fit_to_pages(1, 1)
         workbook.close()
@@ -390,9 +408,9 @@ def list_members(args):
 @ro_required
 def json_export():
     return jsonify(members=[
-        dict(member, expire=str(member['expire'])) for member in
-        Member.select().dicts()
-        ])
+        dict(member, expire=str(member['expire']))
+        for member in Member.select().dicts()
+    ])
 
 @app.route('/import', methods=['GET', 'POST'])
 @login_required
@@ -420,16 +438,19 @@ def verify():
     soup = BeautifulSoup(ama_page.text)
     viewstate = soup.find_all('input', attrs={'name':'__VIEWSTATE'})[0]['value']
     eventvalidation = soup.find_all(
-        'input', attrs={'name':'__EVENTVALIDATION'}
-        )[0]['value']
+        'input',
+        attrs={'name':'__EVENTVALIDATION'},
+    )[0]['value']
     flash(
         'By clicking Verify you will be submitting the following name and '
         'AMA number on modelaircraft.org to verify membership.'
-        )
+    )
     return render_template(
-        'verify.html', record=record,
-        eventvalidation=eventvalidation, viewstate=viewstate
-        )
+        'verify.html',
+        record=record,
+        eventvalidation=eventvalidation,
+        viewstate=viewstate,
+    )
 
 @app.route('/send', methods=['GET', 'POST'])
 @login_required
