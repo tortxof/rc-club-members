@@ -1,5 +1,3 @@
-#! /usr/bin/env python3
-
 from functools import wraps
 import os
 import io
@@ -12,8 +10,19 @@ import datetime
 import requests
 from bs4 import BeautifulSoup
 import xlsxwriter
-from flask import (Flask, Markup, session, render_template, g,
-                   flash, request, redirect, url_for, jsonify, send_file)
+from flask import (
+    Flask,
+    Markup,
+    session,
+    render_template,
+    g,
+    flash,
+    request,
+    redirect,
+    url_for,
+    jsonify,
+    send_file,
+)
 from itsdangerous import URLSafeSerializer
 from werkzeug.security import generate_password_hash, check_password_hash
 import misaka
@@ -29,21 +38,17 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = base64.urlsafe_b64decode(
     os.environ.setdefault(
         'SECRET_KEY',
-        base64.urlsafe_b64encode(os.urandom(24)).decode()
-        )
+        base64.urlsafe_b64encode(os.urandom(24)).decode(),
     )
+)
 
 app.config['CLUB_SHORT_NAME'] = os.environ.get('CLUB_SHORT_NAME')
 app.config['CLUB_DISPLAY_NAME'] = os.environ.get('CLUB_DISPLAY_NAME')
-
 app.config['GA_ID'] = os.environ.get('GA_ID')
-
 app.config['MAILGUN_DOMAIN'] = os.environ.get('MAILGUN_DOMAIN')
 app.config['MAILGUN_KEY'] = os.environ.get('MAILGUN_KEY')
-
 app.config['DEBUG'] = os.environ.get('FLASK_DEBUG', 'false').lower() == 'true'
 app.config['APP_URL'] = os.environ.get('APP_URL')
-
 app.config['PERMANENT_SESSION_LIFETIME'] = 7257600
 
 def normalize_query(input_query):
@@ -72,7 +77,7 @@ def gen_ro_token():
     data = {
         'time': int(time.time()),
         'readonly': True,
-        }
+    }
     return s.dumps(data)
 
 def send_login_email(email):
@@ -85,24 +90,24 @@ def send_login_email(email):
         'from': '{0} <{1}@{2}>'.format(
             f"{app.config['CLUB_DISPLAY_NAME']} Roster",
             'roster',
-            app.config.get('MAILGUN_DOMAIN')
-            ),
+            app.config.get('MAILGUN_DOMAIN'),
+        ),
         'to': email,
         'subject': email_subject,
         'html': render_template(
             'email_layout.html',
             body=Markup(email_body),
-            subject=email_subject
-            ),
-        }
+            subject=email_subject,
+        ),
+    }
 
-    mailgun_response = requests.post(
+    requests.post(
         'https://api.mailgun.net/v3/{}/messages'.format(
             app.config.get('MAILGUN_DOMAIN')
-            ),
+        ),
         auth = ('api', app.config.get('MAILGUN_KEY')),
-        data = email_data
-        )
+        data = email_data,
+    )
 
 def login_required(f):
     @wraps(f)
@@ -140,9 +145,9 @@ def setup():
                 username = request.form['appuser'].strip(),
                 password = generate_password_hash(
                     request.form['password'],
-                    method='pbkdf2:sha256'
-                    )
-                )
+                    method='pbkdf2:sha256',
+                ),
+            )
             flash('Admin user created.')
             return redirect(url_for('login'))
         else:
