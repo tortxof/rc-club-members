@@ -374,6 +374,7 @@ def list_members(args):
                 app.config['CLUB_SHORT_NAME'],
                 datetime.date.today().isoformat(),
             ),
+            cache_timeout=-1,
         )
     else:
         flash('{} records found.'.format(len(records)))
