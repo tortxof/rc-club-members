@@ -5,14 +5,13 @@ name = "pypi"
 
 [packages]
 peewee = "~=2.10.2"
-"psycopg2" = "*"
+"psycopg2-binary" = "*"
 "beautifulsoup4" = "*"
 requests = "*"
 misaka = "*"
 zappa = "*"
-Flask = "~=0.12.4"
+Flask = "~=1.0"
 XlsxWriter = "*"
-pip = "~=9.0.3"
 
 [dev-packages]
 
