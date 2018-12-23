@@ -17,6 +17,13 @@
       <div class="col-sm-9"><a target="_blank" href="{{url_for('verify')}}?id={{ record.id }}">{{ record.ama }}</a></div>
     </div>
 
+    {% if ama_status %}
+    <div class="row">
+      <div class="col-sm-3"><strong>AMA Status</strong></div>
+      <div class="col-sm-9">{{ ama_status }}</div>
+    </div>
+    {% endif %}
+
     <div class="row">
       <div class="col-sm-3"><strong>Phone</strong></div>
       <div class="col-sm-9">{{ record.phone }}</div>

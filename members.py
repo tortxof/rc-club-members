@@ -433,23 +433,25 @@ def json_import():
 @ro_required
 def verify():
     record = Member.get(Member.id == request.args.get('id'))
-    ama_url = 'https://www.modelaircraft.org/MembershipQuery.aspx'
-    ama_page = requests.get(ama_url)
-    soup = BeautifulSoup(ama_page.text)
-    viewstate = soup.find_all('input', attrs={'name':'__VIEWSTATE'})[0]['value']
-    eventvalidation = soup.find_all(
-        'input',
-        attrs={'name':'__EVENTVALIDATION'},
-    )[0]['value']
-    flash(
-        'By clicking Verify you will be submitting the following name and '
-        'AMA number on modelaircraft.org to verify membership.'
+    res = requests.post(
+        'https://www.modelaircraft.org/membership/verify',
+        params={'ajax_form': '1'},
+        data={
+            'form_id': 'membership_verify_form',
+            'last_name': record.last_name,
+            'ama_number': record.ama,
+        },
     )
+    soup = BeautifulSoup(json.loads(res.text)[0]['data'], 'html.parser')
+    ama_status = [
+        line
+        for line in (l.strip() for l in soup.text.split('\n'))
+        if line
+    ][1]
     return render_template(
-        'verify.html',
-        record=record,
-        eventvalidation=eventvalidation,
-        viewstate=viewstate,
+        'records.html',
+        ama_status=ama_status,
+        records=[record],
     )
 
 @app.route('/send', methods=['GET', 'POST'])
