@@ -91,6 +91,7 @@
               <li class="divider"></li>
               {% if session['appuser'] %}
               <li><a href="{{url_for('send_email')}}">Email Current Members</a></li>
+              <li><a href="{{url_for('bulk_edit_expiry')}}">Bulk Edit Expiry Date</a></li>
               <li class="divider"></li>
               <li><a href="{{url_for('get_ro_token')}}">Get read only token</a></li>
               <li><a href="{{url_for('logout')}}">Log Out {{ session['appuser'] }}</a></li>

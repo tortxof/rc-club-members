@@ -244,6 +244,40 @@ def get_member(member_id):
     member = Member.get(Member.id == member_id)
     return render_template('records.html', records=[member])
 
+@app.route('/bulk-edit-expiry', methods=['GET', 'POST'])
+@login_required
+def bulk_edit_expiry():
+    if request.method == 'POST':
+        try:
+            expiry_date = datetime.datetime.strptime(
+                request.form['expiry_date'],
+                '%Y-%m-%d',
+            ).date()
+        except ValueError:
+            flash('Invalid date format.')
+            return redirect(url_for('bulk_edit_expiry'))
+        member_ids = request.form.getlist('member_id')
+        if not member_ids:
+            flash('No members selected.')
+            return redirect(url_for('bulk_edit_expiry'))
+        for member_id in member_ids:
+            try:
+                member = Member.get(Member.id == member_id)
+                member.expire = expiry_date
+                member.save()
+            except Member.DoesNotExist:
+                flash(f'Could not find member id: {member_id}')
+        flash('Member expiry dates updated.')
+        return redirect(url_for('index'))
+    else:
+        members = Member.select().dicts()
+        date = datetime.date.today().replace(month=12, day=31).isoformat()
+        return render_template(
+            'bulk_edit_expiry.html',
+            members=members,
+            date=date,
+        )
+
 @app.route('/edit', methods=['GET', 'POST'])
 @login_required
 def edit():

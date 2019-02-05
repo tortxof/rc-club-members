@@ -1,0 +1,41 @@
+{% extends 'layout.html' %} {% block body %}
+
+<form action="{{ url_for('bulk_edit_expiry') }}" method="post">
+  <div class="form-group">
+    <label for="expiry_date">New Expiry Date</label>
+    <input
+      class="form-control"
+      type="date"
+      id="expiry_date"
+      name="expiry_date"
+      value="{{ date }}"
+    />
+  </div>
+
+  <div class="form-group">
+    <table class="table table-striped">
+      {% for member in members %}
+      <tr>
+        <td>
+          <input
+            type="checkbox"
+            name="member_id"
+            value="{{ member.id }}"
+            id="{{ member.id }}"
+          />
+        </td>
+        <td>
+          <label class="col-sm-10" for="{{ member.id }}">
+            {{ member.first_name }}
+            {{ member.last_name }}
+          </label>
+        </td>
+      </tr>
+      {% endfor %}
+    </table>
+  </div>
+
+  <button class="btn btn-default" type="submit">Update</button>
+</form>
+
+{% endblock %}
