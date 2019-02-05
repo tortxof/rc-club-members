@@ -270,7 +270,10 @@ def bulk_edit_expiry():
         flash('Member expiry dates updated.')
         return redirect(url_for('index'))
     else:
-        members = Member.select().dicts()
+        members = Member.select().order_by(
+            Member.last_name,
+            Member.first_name,
+        ).dicts()
         date = datetime.date.today().replace(month=12, day=31).isoformat()
         return render_template(
             'bulk_edit_expiry.html',
