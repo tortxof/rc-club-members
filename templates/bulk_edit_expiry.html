@@ -25,10 +25,13 @@
           />
         </td>
         <td>
-          <label class="col-sm-10" for="{{ member.id }}">
+          <label for="{{ member.id }}">
             {{ member.first_name }}
             {{ member.last_name }}
           </label>
+        </td>
+        <td>
+          {{ member.expire }}
         </td>
       </tr>
       {% endfor %}
