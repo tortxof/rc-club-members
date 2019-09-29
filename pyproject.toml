@@ -6,7 +6,7 @@ authors = ["Daniel Jones <tortxof@gmail.com>"]
 
 [tool.poetry.dependencies]
 python = "^3.7"
-peewee = "^3.11"
+peewee = "^2.10.2"
 psycopg2-binary = "^2.8"
 beautifulsoup4 = "^4.8"
 requests = "^2.22"
