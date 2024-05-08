@@ -460,11 +460,10 @@ def list_members(args):
         return send_file(
             xlsx_data,
             as_attachment=True,
-            attachment_filename="{}-roster-{}.xlsx".format(
+            download_name="{}-roster-{}.xlsx".format(
                 app.config["CLUB_SHORT_NAME"],
                 datetime.date.today().isoformat(),
             ),
-            cache_timeout=-1,
         )
     else:
         flash("{} records found.".format(len(records)))
