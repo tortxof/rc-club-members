@@ -3,4 +3,4 @@ uwsgi:
   socket: 0.0.0.0:5000
   master: true
   processes: %k
-  module: members:app
+  module: app:app
