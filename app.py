@@ -548,7 +548,7 @@ def verify():
 def send_email():
     if request.method == "POST":
         if "confirm-send" in request.form:
-            s = URLSafeSerializer(app.config.get("SECRET_KEY"))
+            s = URLSafeSerializer(app.config.get("SECRET_KEY"), salt="SEND_EMAIL_DATA")
             try:
                 email_data = s.loads(request.form.get("email_data"))
             except Exception:
@@ -606,7 +606,7 @@ def send_email():
             ),
             "recipient-variables": json.dumps(recipient_variables),
         }
-        s = URLSafeSerializer(app.config.get("SECRET_KEY"))
+        s = URLSafeSerializer(app.config.get("SECRET_KEY"), salt="SEND_EMAIL_DATA")
         return render_template(
             "send_email_confirm.html",
             num_recipients=len(email_data["to"]),
