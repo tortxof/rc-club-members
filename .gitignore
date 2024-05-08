@@ -1,5 +1,6 @@
 __pycache__
 .venv
+.env
 members.db
 /static/components
 zappa_settings.json

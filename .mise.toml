@@ -1,2 +1,6 @@
 [tools]
 python = "3.12.3"
+
+[env]
+_.file = ".env"
+FLASK_SKIP_DOTENV = 1
