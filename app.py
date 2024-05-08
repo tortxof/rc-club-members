@@ -341,10 +341,7 @@ def edit():
             return redirect(url_for("index"))
         Member.get(Member.id == request.form["id"]).update_search_content()
         flash("Record updated.")
-        return render_template(
-            "records.html",
-            records=[Member.get(Member.id == request.form["id"])],
-        )
+        return redirect(url_for("get_member", member_id=request.form["id"]))
     else:
         member_id = request.args.get("id")
         member = Member.get(Member.id == member_id)
