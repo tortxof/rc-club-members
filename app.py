@@ -360,7 +360,7 @@ def delete():
         member = Member.get(Member.id == member_id)
         member.delete_instance(recursive=True)
         flash("Record deleted.")
-        return render_template("records.html", records=[member])
+        return redirect(url_for("index"))
     else:
         member_id = request.args.get("id")
         member = Member.get(Member.id == member_id)
