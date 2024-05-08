@@ -23,7 +23,12 @@ from flask import (
     session,
     url_for,
 )
-from itsdangerous import URLSafeSerializer
+from itsdangerous import (
+    BadData,
+    SignatureExpired,
+    URLSafeSerializer,
+    URLSafeTimedSerializer,
+)
 from markupsafe import Markup
 from peewee import IntegrityError, ProgrammingError
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -78,12 +83,25 @@ def after_request(request):
 
 def gen_ro_token():
     """Return only the token (slug) portion of the ro link."""
-    s = URLSafeSerializer(app.config.get("SECRET_KEY"))
-    data = {
-        "time": int(time.time()),
-        "readonly": True,
-    }
-    return s.dumps(data)
+    return URLSafeTimedSerializer(app.config.get("SECRET_KEY"), salt="RO_TOKEN").dumps(
+        None
+    )
+
+
+def check_ro_token(token):
+    try:
+        URLSafeTimedSerializer(app.config.get("SECRET_KEY"), salt="RO_TOKEN").loads(
+            token, max_age=180 * 24 * 60 * 60
+        )
+    except SignatureExpired:
+        raise
+    except BadData:
+        data = URLSafeSerializer(app.config.get("SECRET_KEY")).loads(token)
+
+        if data.get("readonly") and data.get("time") + 7257600 >= int(time.time()):
+            return
+
+        raise SignatureExpired("Legacy token expired.")
 
 
 def send_login_email(email):
@@ -620,21 +638,16 @@ def get_ro_token():
 
 @app.route("/ro/<slug>")
 def ro_auth(slug):
-    s = URLSafeSerializer(app.config.get("SECRET_KEY"))
     try:
-        data = s.loads(slug)
-    except Exception:
+        check_ro_token(slug)
+    except BadData:
         flash("Authorization failed.")
         return redirect(url_for("index"))
-    # 7257600 is 12 weeks in seconds.
-    if data.get("readonly") and data.get("time") + 7257600 >= int(time.time()):
-        session["readonly"] = True
-        session.permanent = True
-        flash("You have read only access.")
-        return render_template("ro_authorized.html")
-    else:
-        flash("Authorization failed.")
-        return redirect(url_for("index"))
+
+    session["readonly"] = True
+    session.permanent = True
+    flash("You have read only access.")
+    return render_template("ro_authorized.html")
 
 
 @app.route("/email-login", methods=["POST"])
