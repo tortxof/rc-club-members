@@ -266,7 +266,7 @@ def add():
             return redirect(url_for("index"))
         member.update_search_content()
         flash("Record added.")
-        return render_template("records.html", records=[member])
+        return redirect(url_for("get_member", member_id=member.id))
     else:
         end_of_year = (
             datetime.date.today()
