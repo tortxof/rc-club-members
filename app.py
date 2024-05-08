@@ -50,7 +50,6 @@ app.config["SECRET_KEY"] = base64.urlsafe_b64decode(
 
 app.config["CLUB_SHORT_NAME"] = os.getenv("CLUB_SHORT_NAME")
 app.config["CLUB_DISPLAY_NAME"] = os.getenv("CLUB_DISPLAY_NAME")
-app.config["GA_ID"] = os.getenv("GA_ID")
 app.config["MAILGUN_DOMAIN"] = os.getenv("MAILGUN_DOMAIN")
 app.config["MAILGUN_KEY"] = os.getenv("MAILGUN_KEY")
 app.config["DEBUG"] = os.getenv("FLASK_DEBUG", "false").lower() == "true"

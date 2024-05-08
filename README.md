@@ -16,9 +16,6 @@ url of the app, without the trailing `/`. For example
 To send email from the app using mailgun, provide your mailgun domain and key by
 setting environment variables in docker.
 
-If you wish to use Google Analytics, pass the id in the `GA_ID` environment
-variable.
-
 Flask also needs a `SECRET_KEY`. If one is not provided it will be randomly
 generated. If `SECRET_KEY` changes, login sessions and ro tokens will become
 invalid, so it should be provided. The keys are expected to be URL-safe base64
@@ -34,7 +31,6 @@ Pull the image from Docker Hub and run it.
     docker run -d --restart always --name rc-club-members \
       -v /host/path/to/data:/members-data
       -e APP_URL=https://members.example.com \
-      -e GA_ID=UA-XXXXXXXX-X \
       -e MAILGUN_DOMAIN=example.com \
       -e MAILGUN_KEY=key-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx \
       -e SECRET_KEY=EXAMPLE_DO_NOT_USE_IN_PRODUCTION
@@ -87,7 +83,6 @@ a new one.
       -e MAILGUN_KEY=key-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx \
       -e SECRET_KEY=EXAMPLE_DO_NOT_USE_IN_PRODUCTION
       -p 5000:5000 tortxof/rc-club-members
-
 
 ## Build Your Own image
 
