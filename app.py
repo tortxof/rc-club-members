@@ -513,9 +513,11 @@ def verify():
         },
     )
     soup = BeautifulSoup(json.loads(res.text)[0]["data"], "html.parser")
-    ama_status = [line for line in (l.strip() for l in soup.text.split("\n")) if line][
-        1
-    ]
+    ama_status = [
+        stripped_line
+        for stripped_line in (line.strip() for line in soup.text.split("\n"))
+        if stripped_line
+    ][1]
     return render_template(
         "records.html",
         ama_status=ama_status,
@@ -531,7 +533,7 @@ def send_email():
             s = URLSafeSerializer(app.config.get("SECRET_KEY"))
             try:
                 email_data = s.loads(request.form.get("email_data"))
-            except:
+            except Exception:
                 flash("Error decoding email data.")
                 return redirect(url_for("send_email"))
             mailgun_response = requests.post(
@@ -621,7 +623,7 @@ def ro_auth(slug):
     s = URLSafeSerializer(app.config.get("SECRET_KEY"))
     try:
         data = s.loads(slug)
-    except:
+    except Exception:
         flash("Authorization failed.")
         return redirect(url_for("index"))
     # 7257600 is 12 weeks in seconds.
