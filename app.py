@@ -377,7 +377,7 @@ def list_members(args):
     elif "active" in args:
         records = Member.active().dicts()
     else:
-        records = Member.select().dicts()
+        records = Member.ordered().dicts()
 
     if "email" in args:
         emails = (
