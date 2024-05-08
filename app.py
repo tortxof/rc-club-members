@@ -43,13 +43,13 @@ app.config["SECRET_KEY"] = base64.urlsafe_b64decode(
     )
 )
 
-app.config["CLUB_SHORT_NAME"] = os.environ.get("CLUB_SHORT_NAME")
-app.config["CLUB_DISPLAY_NAME"] = os.environ.get("CLUB_DISPLAY_NAME")
-app.config["GA_ID"] = os.environ.get("GA_ID")
-app.config["MAILGUN_DOMAIN"] = os.environ.get("MAILGUN_DOMAIN")
-app.config["MAILGUN_KEY"] = os.environ.get("MAILGUN_KEY")
-app.config["DEBUG"] = os.environ.get("FLASK_DEBUG", "false").lower() == "true"
-app.config["APP_URL"] = os.environ.get("APP_URL")
+app.config["CLUB_SHORT_NAME"] = os.getenv("CLUB_SHORT_NAME")
+app.config["CLUB_DISPLAY_NAME"] = os.getenv("CLUB_DISPLAY_NAME")
+app.config["GA_ID"] = os.getenv("GA_ID")
+app.config["MAILGUN_DOMAIN"] = os.getenv("MAILGUN_DOMAIN")
+app.config["MAILGUN_KEY"] = os.getenv("MAILGUN_KEY")
+app.config["DEBUG"] = os.getenv("FLASK_DEBUG", "false").lower() == "true"
+app.config["APP_URL"] = os.getenv("APP_URL")
 app.config["PERMANENT_SESSION_LIFETIME"] = 7257600
 
 
